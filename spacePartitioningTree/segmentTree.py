@@ -151,6 +151,7 @@ class SegmentTree():
         max_depth = int(math.log(num_leaves) / math.log(2)) + 1
         num_last_leaves = 2 * (num_leaves - 2**(max_depth - 1))
 
+        # build tree from bottom to up
         q = []
         for i, elem in enumerate(elements):
             if i < num_last_leaves:
@@ -168,7 +169,6 @@ class SegmentTree():
                 q.append(node)
 
         while len(q) > 1:
-            print(len(q))
             tmp_q = []
             for i, node in enumerate(q):
                 if i % 2 == 0:
