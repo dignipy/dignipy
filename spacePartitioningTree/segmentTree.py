@@ -90,25 +90,17 @@ class TreeNode():
         return 'TreeNode({})'.format(interval_string)
 
     def query(self, point):
-        if self.left is None:
-            return self
-        else:
-            middle = self.left.right_endpoint
-            middle_is_left = self.left.right_closed
-
-        if self.left_endpoint < point < self.right_endpoint:
-            pass
-        elif self.left_closed and point == self.left_endpoint:
-            pass
-        elif self.right_closed and point == self.right_endpoint:
-            pass
-        else:
+        point_interval = Interval(point, point, True, True)
+        found = list(self.subset)
+        if not self.interval.contains(point_interval):
             return None
-
-        if point < middle or (middle_is_left and point == middle):
-            return self.left
-        else:
-            return self.right
+        if self.left is not None:
+            for intv in self.left.query(point):
+                found.append(intv)
+        if self.right is not None:
+            for intv in self.right.query(point):
+                found.append(intv)
+        return found
 
 
 class SegmentTree():
