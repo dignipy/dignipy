@@ -107,6 +107,12 @@ class SegmentTree():
     def __init__(self, intervals):
         self.intervals = intervals
         self.root = None
+        self.build_tree()
+
+    def query(self, point):
+        if self.root is None:
+            raise Exception('tree must be built first')
+        return self.root.query(point)
 
     def build_tree(self):
         intervals = self.intervals
