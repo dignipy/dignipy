@@ -7,3 +7,7 @@ Various data structure implementations in Python.
 ### Multiway Trees
 
 * [Disjoint-set](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
+
+### Space-partitioning Trees
+
+* [Segment tree](https://en.wikipedia.org/wiki/Segment_tree)
