@@ -1,4 +1,22 @@
-import heapq
+# -*- coding: utf-8 -*-
+"""segmentTree.py
+
+This module implements segment tree as described in:
+    https://en.wikipedia.org/wiki/Segment_tree
+
+A segment tree also known as a statistic tree is a tree data structure used
+for storing information about intervals, or segments. It allows querying
+which of the stored segments contain a given point. It is, in principle, a
+static structure; that is, it's a structure that cannot be modified once it's
+built.
+
+A segment tree for a set I of n intervals uses O(n log n) storage and can be
+built in O(n log n) time. Segment trees support searching for all the intervals
+that contain a query point in O(log n + k), k being the number of retrieved
+intervals or segments.
+
+"""
+
 import math
 
 
@@ -23,44 +41,22 @@ class Interval():
         interval_string = left_bracket + s + right_bracket
         return 'Interval({})'.format(interval_string)
 
-    def contains(self, interval1):
-        interval2 = self
-        if interval1.left_endpoint < interval2.left_endpoint:
+    def contains(self, another_interval):
+        """check if this interval contains another_interval"""
+        if another_interval.left_endpoint < self.left_endpoint:
             return False
-        if interval1.left_endpoint == interval2.left_endpoint:
-            if not interval2.left_closed:
+        if another_interval.left_endpoint == self.left_endpoint:
+            if not self.left_closed and another_interval.left_closed:
                 return False
-        if interval1.right_endpoint > interval2.right_endpoint:
+        if another_interval.right_endpoint > self.right_endpoint:
             return False
-        if interval1.right_endpoint == interval2.right_endpoint:
-            if not interval2.right_closed:
+        if another_interval.right_endpoint == self.right_endpoint:
+            if not self.right_closed and another_interval.right_closed:
                 return False
         return True
 
     def intersects(self, interval):
-        if self.left_endpoint == interval.right_endpoint:
-            if self.left_closed and interval.right_closed:
-                return True
-            else:
-                return False
-
-        if self.right_endpoint == interval.left_endpoint:
-            if self.right_closed and interval.left_closed:
-                return True
-            else:
-                return False
-
-        left_point = interval.left_endpoint
-        point_interval = Interval(left_point, left_point, True, True)
-        if self.contains(point_interval):
-            return True
-
-        right_point = interval.right_endpoint
-        point_interval = Interval(right_point, right_point, True, True)
-        if self.contains(point_interval):
-            return True
-        else:
-            return False
+        raise NotImplementedError('To do: implement intersection check')
 
 
 class TreeNode():
@@ -90,11 +86,11 @@ class TreeNode():
         return 'TreeNode({})'.format(interval_string)
 
     def query(self, point):
+        """return list of Interval objects containing point in the subtree"""
         point_interval = Interval(point, point, True, True)
         found = []
         for intv in self.subset:
-            if intv.contains(point_interval):
-                found.append(intv)
+            found.append(intv)
         if not self.interval.contains(point_interval):
             return []
         if self.left is not None:
@@ -113,11 +109,15 @@ class SegmentTree():
         self.build_tree()
 
     def query(self, point):
+        """return list of all Interval objects containing point"""
         if self.root is None:
             raise Exception('tree must be built first')
         return self.root.query(point)
 
     def build_tree(self):
+        """Build segment tree from given intervals.
+        Takes O(n log(n)) time.
+        """
         intervals = self.intervals
         endpoints = []
         for interval in intervals:
@@ -126,17 +126,15 @@ class SegmentTree():
         endpoints.append(float('inf'))
         endpoints.append(float('-inf'))
 
-        heapq.heapify(endpoints)
-        result = []
-        while endpoints:
-            ep = heapq.heappop(endpoints)
-            if result and result[-1] == ep:
-                pass
-                # remove duplicate
+        endpoints.sort()
+        unique_endpoints = []
+        for i, ep in enumerate(endpoints):
+            if i + 1 < len(endpoints) and ep == endpoints[i + 1]:
+                continue
             else:
-                result.append(ep)
+                unique_endpoints.append(ep)
 
-        endpoints = result
+        endpoints = unique_endpoints
         elements = []
         for i, ep in enumerate(endpoints):
             if i == 0:
@@ -190,32 +188,32 @@ class SegmentTree():
         self.root = q[0]
 
         for interval in intervals:
-            self.append_subset(self.root, interval)
+            self._append_subset(self.root, interval)
 
         return self.root
 
-    def append_subset(self, node, interval):
-        if not node.interval.intersects(interval):
-            return None
-        elif node.interval.contains(interval):
+    def _append_subset(self, node, interval):
+        """Recursive function to add canonical subsets"""
+        if interval.contains(node.interval):
             node.subset.append(interval)
             return None
         if node.left is not None:
-            self.append_subset(node.left, interval)
+            self._append_subset(node.left, interval)
         if node.right is not None:
-            self.append_subset(node.right, interval)
+            self._append_subset(node.right, interval)
 
 
 if __name__ == '__main__':
     import random
     intervals = []
     for _ in range(10):
-        choice = random.choices(list(range(100)), k=2)
-        closed1 = bool(random.choice([0, 1]))
-        closed2 = bool(random.choice([0, 1]))
-        intv = Interval(min(choice), max(choice), closed1, closed2)
+        endpoints = []
+        endpoints.append(random.choice(list(range(100))))
+        endpoints.append(random.choice(list(range(100))))
+        l_closed = random.choice([False, True])
+        r_closed = random.choice([False, True])
+        intv = Interval(min(endpoints), max(endpoints), l_closed, r_closed)
         intervals.append(intv)
-        print(intv)
-
+    print('intervals:', intervals)
     seg_tree = SegmentTree(intervals)
-    print(seg_tree.query(34))
+    print('intervals containing 34:', seg_tree.query(34))
