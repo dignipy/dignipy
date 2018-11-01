@@ -174,7 +174,7 @@ class FenwickTree(collections.abc.MutableSequence):
 if __name__ == '__main__':
     """example"""
 
-    f_tree = FenwickTree(list(range(14)))
+    f_tree = FenwickTree(list(range(8)))
     print('print:', f_tree)
     # print: FenwickTree([0, 1, 2, 3, 4, 5, 6, 7])
 
