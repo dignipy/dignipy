@@ -51,6 +51,9 @@ class FenwickTree(collections.abc.MutableSequence):
         tree_idx = index + 1
         self._fill_tree_from(tree_idx)
 
+    def delete(self, index):
+        self.__delitem__(index)
+
     def insert(self, index, value):
         self.elements.insert(index, value)
         tree_idx = index + 1
