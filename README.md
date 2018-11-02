@@ -7,7 +7,7 @@ Various data structure implementations in Python.
 ### Multiway Trees
 
 * [Disjoint-set](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
-* [Fenwick tree](https://en.wikipedia.org/wiki/Fenwick_tree)
+* [Fenwick tree](./descriptions/FenwickTree.md)
 
 ### Space-partitioning Trees
 
