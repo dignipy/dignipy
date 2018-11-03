@@ -8,24 +8,24 @@ A node in a Fenwick tree has an index and a value. The root's index is 0 and the
 
 ![Fenwick Tree](./FenwickTreeImage.png)
 
-- Root node has index `0<sub>2</sub>` and doesn't correspond to any element of the given 1-based sequence.
-- Root node has 4 children indices: `1<sub>2</sub>`, `10<sub>2</sub>`, `100<sub>2</sub>`, `1000<sub>2</sub>` because removing the least-significant bit in the index of the children gives the root's index, `0<sub>2</sub>`. However, since the last index of the given 1-based sequence is 13 and `10000<sub>2</sub>` is greater, it is not a child index of the root.
+- Root node has index 0<sub>2</sub> and doesn't correspond to any element of the given 1-based sequence.
+- Root node has 4 children indices: 1<sub>2</sub>, 10<sub>2</sub>, 100<sub>2</sub>, 1000<sub>2</sub> because removing the least-significant bit in the index of the children gives the root's index, 0<sub>2</sub>. However, since the last index of the given 1-based sequence is 13 and 10000<sub>2</sub> is greater, it is not a child index of the root.
 - Each node stores a value of the partial sum after the parent's index upto the node's index.
-- Node with index `1<sub>2</sub>` 
+- Node with index 1<sub>2</sub> 
   - stores the partial sum: `1 = 1`
   - leaf node because no other least-significant bit can be added to the index
-- Node with index `10<sub>2</sub>`
+- Node with index 10<sub>2</sub>
   - stores the partial sum: `3 = 1 + 2`
-  - has a child with index `11<sub>2</sub>`
-- Node with index `100<sub>2</sub>`
+  - has a child with index 11<sub>2</sub>
+- Node with index 100<sub>2</sub>
   - stores the partial sum: `10 = 1 + 2 + 3 + 4`
-  - has 2 children with indices: `101<sub>2</sub>`, `110<sub>2</sub>`
-- Node with index `1000<sub>2</sub>`
+  - has 2 children with indices: 101<sub>2</sub>, 110<sub>2</sub>
+- Node with index 1000<sub>2</sub>
   - stores the partial sum: `36 = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8`
-  - has 3 children with indices: `1001<sub>2</sub>`, `1010<sub>2</sub>`, `1100<sub>2</sub>`
-- Node with index `110<sub>2</sub>`
-  - has parent index `100<sub>2</sub> = 4`
-  - stores the partial sum from index `5` to `6`(`110<sub>2</sub>`): 11 = 5 + 6
+  - has 3 children with indices: 1001<sub>2</sub>, 1010<sub>2</sub>, 1100<sub>2</sub>
+- Node with index 110<sub>2</sub>
+  - has parent index 100<sub>2</sub> = 4
+  - stores the partial sum from index 5 to 6(110<sub>2</sub>): `11 = 5 + 6`
 
 
 
