@@ -25,7 +25,7 @@ A node in a Fenwick tree has an index and a value. The root's index is 0 and the
   - has 3 children with indices: 1001<sub>2</sub>, 1010<sub>2</sub>, 1100<sub>2</sub>
 - Node with index 110<sub>2</sub>
   - has parent index 100<sub>2</sub> = 4
-  - stores the partial sum from index 5 to 6(110<sub>2</sub>): `11 = 5 + 6`
+  - stores the partial sum from index 5 to 6 (=110<sub>2</sub>): `11 = 5 + 6`
 
 
 
