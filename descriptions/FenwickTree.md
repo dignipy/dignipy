@@ -35,7 +35,6 @@ A node in a Fenwick tree has an index and a value. The root's index is 0 and the
 
 ## prefix_sum( )
 - runs in O(log n) time
-- getting the parent's index:
 
 ## append( )
 - runs in O(log n) time
