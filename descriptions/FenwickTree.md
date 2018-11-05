@@ -1,4 +1,5 @@
 
+
 # Fenwick Tree
 
 >A Fenwick tree or binary indexed tree is a data structure that can efficiently update elements and calculate [prefix sums](https://en.wikipedia.org/wiki/Prefix_sum) in a table of numbers. This structure was proposed by Peter Fenwick in 1994 to improve the efficiency of arithmetic coding compression algorithms. - [Wikipedia](https://en.wikipedia.org/wiki/Fenwick_tree)
@@ -34,6 +35,7 @@ A node in a Fenwick tree has an index and a value. The root's index is 0 and the
 
 ## prefix_sum( )
 - runs in O(log n) time
+- getting the parent's index:
 
 ## append( )
 - runs in O(log n) time
@@ -44,4 +46,43 @@ A node in a Fenwick tree has an index and a value. The root's index is 0 and the
 ## delete( )
 - runs in O(n) time
 
+
+# Helper Methods
+
+## _parent_index( )
+- given a 1-based index, return the index of the parent
+
+
+```python
+def _parent_index(tree_idx):
+    """get the parent's index in tree"""
+    return tree_idx - _least_significant_bit(tree_idx)
+
+def _least_significant_bit(tree_idx):
+    """binary operation to get the least significant bit in a binary index
+    because of Python uses a two's complement binary signed integer representation,
+    the bits of a binary number and the two's complement only differs in the least
+    significant bit.
+    
+    for example, 
+     12 is represented as 00001100
+    -12 is represented as 11110100
+                        & ________
+                   gives  00000100
+    which is the least significant bit of 12.
+    """
+    return tree_idx & -tree_idx
+
+print('12 =', bin(12))
+lsb = _least_significant_bit(12)
+print('least significant bit:', lsb, '=', bin(lsb))
+parent_idx = _parent_index(12)
+print('parent index:', parent_idx, '=', bin(parent_idx))
+print('least significant bit removed')
+```
+
+    12 = 0b1100
+    least significant bit: 4 = 0b100
+    parent index: 8 = 0b1000
+    least significant bit removed
 
