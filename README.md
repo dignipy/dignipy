@@ -6,14 +6,19 @@ Various data structure implementations in Python.
 
 ### Multiway Trees
 
-* [Disjoint-set](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
-* [Fenwick tree](./descriptions/FenwickTree.md)
+* Disjoint-set
+- [description](https://en.wikipedia.org/wiki/Disjoint-set_data_structure), [code](./MultiwayTree/disjointSet.py)
+* Fenwick Tree
+- [description](./descriptions/FenwickTree.md), [code](./MultiwayTree/fenwickTree.py)
 
 ### Binary Search Trees
 
-* [AVL tree](https://en.wikipedia.org/wiki/AVL_tree)
-* [Red-black tree](./descriptions/RedBlackTree.md)
+* AVL Tree
+- [description](https://en.wikipedia.org/wiki/AVL_tree)
+* Red-black Tree
+- [description](./descriptions/RedBlackTree.md)
 
 ### Space-partitioning Trees
 
-* [Segment tree](https://en.wikipedia.org/wiki/Segment_tree)
+* Segment Tree
+- [description](https://en.wikipedia.org/wiki/Segment_tree), [code](./spacePartitioningTree/segmentTree.py)
