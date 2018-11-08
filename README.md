@@ -9,6 +9,11 @@ Various data structure implementations in Python.
 * [Disjoint-set](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
 * [Fenwick tree](./descriptions/FenwickTree.md)
 
+### Binary Search Trees
+
+* [AVL tree](https://en.wikipedia.org/wiki/AVL_tree)
+* [Red-black tree](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
+
 ### Space-partitioning Trees
 
 * [Segment tree](https://en.wikipedia.org/wiki/Segment_tree)
