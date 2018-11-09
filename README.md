@@ -22,3 +22,8 @@ Various data structure implementations in Python.
 
 - Segment Tree
   - [description](https://en.wikipedia.org/wiki/Segment_tree), [code](./spacePartitioningTree/segmentTree.py)
+
+### Graphs
+
+- Zero-suppressed decision diagram
+  - [description](https://en.wikipedia.org/wiki/Zero-suppressed_decision_diagram)
