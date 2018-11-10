@@ -5,6 +5,12 @@ import weakref
 
 class Node():
     def __init__(self, top, key=None, lo=None, hi=None):
+        """
+        top: nonnegative integer except for terminal nodes
+        key: unique key to identify the node
+        lo: the node that the 0-edge leads to
+        hi: the node that the 1-edge leads to
+        """
         self.top = top
         self.lo = lo
         self.hi = hi
@@ -68,7 +74,7 @@ class ZDD():
 
     def subset0(self, p, var):
         if p.top < var:
-            return self.get_node(0, None, None)
+            return self.empty()
         elif p.top == var:
             return p.lo
         else:
@@ -78,7 +84,7 @@ class ZDD():
 
     def subset1(self, p, var):
         if p.top < var:
-            return self.get_node(0, None, None)
+            return self.empty()
         elif p.top == var:
             return p.hi
         else:
@@ -88,7 +94,7 @@ class ZDD():
 
     def change(self, p, var):
         if p.top < var:
-            empty = self.get_node(0, None, None)
+            empty = self.empty()
             return self.get_node(var, empty, p)
         elif p.top == var:
             return self.get_node(var, p.hi, p.lo)
@@ -114,7 +120,7 @@ class ZDD():
         else:
             lo_union = self.union(p.lo, q.lo)
             hi_union = self.union(p.hi, q.hi)
-            return self.get_ndoe(p.top, lo_union, hi_union)
+            return self.get_node(p.top, lo_union, hi_union)
 
     def intersection(self, p, q):
         p_node = self.get_node(p.top, p.lo, p.hi)
@@ -133,7 +139,7 @@ class ZDD():
         else:
             lo_intersect = self.intersection(p.lo, q.lo)
             hi_intersect = self.intersection(p.hi, q.hi)
-            return self.get_ndoe(p.top, lo_intersect, hi_intersect)
+            return self.get_node(p.top, lo_intersect, hi_intersect)
 
     def difference(self, p, q):
         p_node = self.get_node(p.top, p.lo, p.hi)
@@ -146,13 +152,13 @@ class ZDD():
         elif p_node == q_node:
             return empty
         elif p.top > q.top:
-            return self.get_ndoe(p.top, self.difference(p.lo, q), p.hi)
+            return self.get_node(p.top, self.difference(p.lo, q), p.hi)
         elif p.top < q.top:
             return self.difference(p, q.lo)
         else:
             lo_diff = self.difference(p.lo, q.lo)
             hi_diff = self.difference(p.hi, q.hi)
-            return self.get_ndoe(p.top, lo_diff, hi_diff)
+            return self.get_node(p.top, lo_diff, hi_diff)
 
     def count(self, p):
         """ count the number of 1-paths """
@@ -165,7 +171,7 @@ class ZDD():
             return self.count(p.lo) + self.count(p.hi)
 
     def get_set(self, p):
-        """ return the corresponding set of p """
+        """ change ZDD to a corresponding family of sets """
         p_node = self.get_node(p.top, p.lo, p.hi)
         if p_node is self.empty():
             return frozenset([])
@@ -175,6 +181,32 @@ class ZDD():
         top_set = set([p.top])
         f1_with_top = [frozenset([s.union(top_set)]) for s in f1]
         return frozenset.union(self.get_set(p.lo), *f1_with_top)
+
+    def is_excluded(self, p, var):
+        if p.top < var:
+            return True
+        elif p.top == var:
+            return False
+        else:
+            lo_excluded = self.is_excluded(p.lo, var)
+            hi_excluded = self.is_excluded(p.hi, var)
+            return lo_excluded and hi_excluded
+
+    def make_free(self, p, var):
+        """
+        make the var node free (no restriction condition on var)
+        """
+        if p.top < var:
+            return self.get_node(var, p, p)
+        elif p.top == var:
+            tmp_p = self.change(p, var)
+            return self.union(p, tmp_p)
+        else:
+            # p.top > var
+            new_lo = self.make_free(p.lo, var)
+            new_hi = self.make_free(p.hi, var)
+            return self.get_node(p.top, new_lo, new_hi)
+
 
 
 if __name__ == '__main__':
