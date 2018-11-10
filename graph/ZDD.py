@@ -165,7 +165,7 @@ class ZDD():
             return self.count(p.lo) + self.count(p.hi)
 
     def get_set(self, p):
-        """ change ZDD to a corresponding family of sets """
+        """ return the corresponding set of p """
         p_node = self.get_node(p.top, p.lo, p.hi)
         if p_node is self.empty():
             return frozenset([])
