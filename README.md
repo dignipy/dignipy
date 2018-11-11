@@ -14,7 +14,7 @@ Various data structure implementations in Python.
 ### Binary Search Trees
 
 - Vanilla Binary Search Tree
-  - [Description](https://en.wikipedia.org/wiki/Binary_search_tree)
+  - [Description](https://en.wikipedia.org/wiki/Binary_search_tree), [Code](./binarySearchTree/BST.py)
 - AVL Tree
   - [Description](https://en.wikipedia.org/wiki/AVL_tree)
 - Red-black Tree
