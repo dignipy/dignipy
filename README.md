@@ -13,10 +13,12 @@ Various data structure implementations in Python.
 
 ### Binary Search Trees
 
+- Vanilla Binary Search Tree
+  - [Description](https://en.wikipedia.org/wiki/Binary_search_tree)
 - AVL Tree
   - [Description](https://en.wikipedia.org/wiki/AVL_tree)
 - Red-black Tree
-  - [Description](./descriptions/RedBlackTree.md)
+  - [Description](./descriptions/RedBlackTree.md), [Code](./binarySearchTree/redBlackTree.py)
 
 ### Space-partitioning Trees
 
