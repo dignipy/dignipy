@@ -9,6 +9,10 @@ tree's height: ceil(log(N+1)) <= h <= N
 - worst case: skewed binary tree
 
 """
+
+import bst_utils
+
+
 class Node():
     def __init__(self, key, value):
         self.key = key
@@ -17,7 +21,7 @@ class Node():
         self.right = None
     
     def __repr__(self):
-        return 'Node({},"{}")'.format(self.key, self.value)
+        return 'Node({},{})'.format(self.key, repr(self.value))
 
 
 class BST():
@@ -81,9 +85,9 @@ class BST():
     
     def _delete(self, node, key):
         """
-            case 0: target node has no child
-            case 1: target node has one child(left or right)
-            case 2: target node has two children(left and right)
+        case 0: target node has no child
+        case 1: target node has one child(left or right)
+        case 2: target node has two children(left and right)
         """
         if node is None:
             return None
@@ -112,13 +116,15 @@ if __name__ == '__main__':
     bst.insert(5, 'E')
     bst.insert(14, 'F')
 
-    print(bst.root)
-    print(bst.root.left, bst.root.right)
-    print(bst.root.right.right)
-    print('min', bst.min())
+    print('after insertion')
+
+    bst_utils.in_order(bst.root)
+
     bst.delete_min()
-    print('min', bst.min())
+    print('after deleting min')
+    bst_utils.in_order(bst.root)
+
     bst.delete(12)
-    print('after delete 12', bst.root)
-    print(bst.root.left, bst.root.right)
+    print('after delete 12')
+    bst_utils.in_order(bst.root)
 
