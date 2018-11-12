@@ -92,6 +92,38 @@ class ZDD():
             hi_subset = self.subset1(p.hi, var)
             return self.get_node(p.top, lo_subset, hi_subset)
 
+    def offset(self, p, var):
+        empty = self.empty()
+        base = self.base()
+        if p is empty:
+            return empty
+        elif p is base:
+            return base
+        elif p.top > var:
+            return p
+        elif p.top == var:
+            return p.lo
+        else:
+            lo_subset = self.offset(p.lo, var)
+            hi_subset = self.offset(p.hi, var)
+            return self.get_node(p.top, lo_subset, hi_subset)
+
+    def onset(self, p, var):
+        empty = self.empty()
+        base = self.base()
+        if p is empty:
+            return empty
+        elif p is base:
+            return empty
+        elif p.top > var:
+            return empty
+        elif p.top == var:
+            return p.hi
+        else:
+            lo_subset = self.onset(p.lo, var)
+            hi_subset = self.onset(p.hi, var)
+            return self.get_node(p.top, lo_subset, hi_subset)
+
     def change(self, p, var):
         if p.top < var:
             empty = self.empty()
@@ -182,6 +214,58 @@ class ZDD():
         f1_with_top = [frozenset([s.union(top_set)]) for s in f1]
         return frozenset.union(self.get_set(p.lo), *f1_with_top)
 
+    def product(self, p, q):
+        empty = self.empty()
+        base = self.base()
+        if p is empty:
+            return empty
+        elif p is base:
+            return q
+        elif q is empty:
+            return empty
+        elif q is base:
+            return p
+        elif p.top > q.top:
+            return self.product(q, p)
+        else:
+            var = p.top
+            p0 = self.offset(p, var)
+            p1 = self.onset(p, var)
+            q0 = self.offset(q, var)
+            q1 = self.onset(q, var)
+            r0 = self.product(p0, q0)
+            tmp1 = self.product(p1, q1)
+            tmp2 = self.union(tmp1, self.product(p1, q0))
+            r1 = self.union(tmp2, self.product(p0, q1))
+            return self.get_node(var, r0, r1)
+
+    def division(self, p, q):
+        empty = self.empty()
+        base = self.base()
+        if q is base:
+            return p
+        elif p is empty or p is base:
+            return empty
+        elif p is q:
+            return base
+        else:
+            var = q.top
+            p0 = self.offset(p, var)
+            p1 = self.onset(p, var)
+            q0 = self.offset(q, var)
+            q1 = self.onset(q, var)
+            result = self.division(p1, q1)
+            if result is not empty and q0 is not empty:
+                div = self.division(p0, q0)
+                result = self.intersection(result, div)
+            return result
+
+    def remainder(self, p, q):
+        """ calculate p - (p * (p/1)) """
+        div = self.division(p, q)
+        prod = self.product(p, div)
+        return self.difference(p, prod)
+
     def is_excluded(self, p, var):
         if p.top < var:
             return True
@@ -207,6 +291,34 @@ class ZDD():
             new_hi = self.make_free(p.hi, var)
             return self.get_node(p.top, new_lo, new_hi)
 
+    def from_set(self, in_set):
+        if in_set == frozenset():
+            return self.empty()
+        elif in_set == frozenset([frozenset()]):
+            return self.base()
+        max_var = self._get_max_var(in_set)
+        onset = set()
+        offset = set()
+        var_set = set([max_var])
+        for cube_set in in_set:
+            if max_var in cube_set:
+                onset.add(cube_set - var_set)
+            else:
+                offset.add(cube_set)
+        p0 = self.from_set(offset)
+        p1 = self.from_set(onset)
+        return self.get_node(max_var, p0, p1)
+
+    def _get_max_var(self, in_set):
+        """ get max variable from all the sets in the in_set family """
+        tmp_max = float('-inf')
+        for cube_set in in_set:
+            if len(cube_set) == 0:
+                continue
+            tmp_max = max(tmp_max, max(cube_set))
+        if tmp_max < 0:
+            raise ValueError('Not a supported set type')
+        return tmp_max
 
 
 if __name__ == '__main__':
@@ -224,3 +336,12 @@ if __name__ == '__main__':
     d = zdd.union(b, c)
     print('d: union,', zdd.get_set(d))
 
+    e_set = frozenset([frozenset([1, 2, 4]), frozenset([4])])
+    e = zdd.from_set(e_set)
+    print(zdd.get_set(e))
+
+    f_set = frozenset([frozenset([3])])
+    f = zdd.from_set(f_set)
+    print(zdd.get_set(f))
+
+    print(zdd.get_set(zdd.product(e, f)))
