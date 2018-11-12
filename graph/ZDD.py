@@ -72,26 +72,6 @@ class ZDD():
             self.key2node[(-1, True, True)] = self._base
         return self._base
 
-    def subset0(self, p, var):
-        if p.top < var:
-            return self.empty()
-        elif p.top == var:
-            return p.lo
-        else:
-            lo_subset = self.subset0(p.lo, var)
-            hi_subset = self.subset0(p.hi, var)
-            return self.get_node(p.top, lo_subset, hi_subset)
-
-    def subset1(self, p, var):
-        if p.top < var:
-            return self.empty()
-        elif p.top == var:
-            return p.hi
-        else:
-            lo_subset = self.subset1(p.lo, var)
-            hi_subset = self.subset1(p.hi, var)
-            return self.get_node(p.top, lo_subset, hi_subset)
-
     def offset(self, p, var):
         empty = self.empty()
         base = self.base()
@@ -338,10 +318,10 @@ if __name__ == '__main__':
 
     e_set = frozenset([frozenset([1, 2, 4]), frozenset([4])])
     e = zdd.from_set(e_set)
-    print(zdd.get_set(e))
+    print('e:', zdd.get_set(e))
 
     f_set = frozenset([frozenset([3])])
     f = zdd.from_set(f_set)
-    print(zdd.get_set(f))
+    print('f:', zdd.get_set(f))
 
-    print(zdd.get_set(zdd.product(e, f)))
+    print('e * f: ', zdd.get_set(zdd.product(e, f)))
