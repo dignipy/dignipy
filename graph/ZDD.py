@@ -25,7 +25,7 @@ class Node():
 class ZDD():
     def __init__(self):
         # garbage collect removed nodes
-        self.key2node = weakref.WeakValueDictionary()
+        self._unique_table = weakref.WeakValueDictionary()
 
         # self.level2nodes = collections.defaultdict(list)
         self._base = None
@@ -44,11 +44,11 @@ class ZDD():
 
         if p1 is self.empty():
             return p0
-        elif (top, key0, key1) in self.key2node:
-            return self.key2node[(top, key0, key1)]
+        elif (top, key0, key1) in self._unique_table:
+            return self._unique_table[(top, key0, key1)]
         else:
             p = Node(top, key=self._next_unique_key, lo=p0, hi=p1)
-            self.key2node[(top, key0, key1)] = p
+            self._unique_table[(top, key0, key1)] = p
             self._next_unique_key += 1
             return p
 
@@ -59,7 +59,7 @@ class ZDD():
             key = self._next_unique_key
             self._next_unique_key += 1
             self._empty = Node(-1, key=key, lo=False, hi=False)
-            self.key2node[(-1, False, False)] = self._empty
+            self._unique_table[(-1, False, False)] = self._empty
         return self._empty
 
     def base(self):
@@ -69,37 +69,18 @@ class ZDD():
             key = self._next_unique_key
             self._next_unique_key += 1
             self._base = Node(-1, key=key, lo=True, hi=True)
-            self.key2node[(-1, True, True)] = self._base
+            self._unique_table[(-1, True, True)] = self._base
         return self._base
 
-    def subset0(self, p, var):
-        if p.top < var:
-            return self.empty()
-        elif p.top == var:
-            return p.lo
-        else:
-            lo_subset = self.subset0(p.lo, var)
-            hi_subset = self.subset0(p.hi, var)
-            return self.get_node(p.top, lo_subset, hi_subset)
-
-    def subset1(self, p, var):
-        if p.top < var:
-            return self.empty()
-        elif p.top == var:
-            return p.hi
-        else:
-            lo_subset = self.subset1(p.lo, var)
-            hi_subset = self.subset1(p.hi, var)
-            return self.get_node(p.top, lo_subset, hi_subset)
-
     def offset(self, p, var):
+        """ returns the top node of ZDD when var is 0 with var node removed """
         empty = self.empty()
         base = self.base()
         if p is empty:
             return empty
         elif p is base:
             return base
-        elif p.top > var:
+        elif p.top < var:
             return p
         elif p.top == var:
             return p.lo
@@ -109,13 +90,14 @@ class ZDD():
             return self.get_node(p.top, lo_subset, hi_subset)
 
     def onset(self, p, var):
+        """ returns the top node of ZDD when var is 1 with var node removed """
         empty = self.empty()
         base = self.base()
         if p is empty:
             return empty
         elif p is base:
             return empty
-        elif p.top > var:
+        elif p.top < var:
             return empty
         elif p.top == var:
             return p.hi
@@ -125,6 +107,7 @@ class ZDD():
             return self.get_node(p.top, lo_subset, hi_subset)
 
     def change(self, p, var):
+        """ change hi and lo edges of the var node """
         if p.top < var:
             empty = self.empty()
             return self.get_node(var, empty, p)
@@ -136,6 +119,7 @@ class ZDD():
             return self.get_node(p.top, lo_change, hi_change)
 
     def union(self, p, q):
+        """ union of 1-paths"""
         p_node = self.get_node(p.top, p.lo, p.hi)
         q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
@@ -155,6 +139,7 @@ class ZDD():
             return self.get_node(p.top, lo_union, hi_union)
 
     def intersection(self, p, q):
+        """ intersetction of 1-paths """
         p_node = self.get_node(p.top, p.lo, p.hi)
         q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
@@ -174,6 +159,7 @@ class ZDD():
             return self.get_node(p.top, lo_intersect, hi_intersect)
 
     def difference(self, p, q):
+        """ set difference of 1-paths """
         p_node = self.get_node(p.top, p.lo, p.hi)
         q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
@@ -206,7 +192,7 @@ class ZDD():
         """ change ZDD to a corresponding family of sets """
         p_node = self.get_node(p.top, p.lo, p.hi)
         if p_node is self.empty():
-            return frozenset([])
+            return frozenset([])  # use frozenset for hashing
         elif p_node is self.base():
             return frozenset([frozenset([])])
         f1 = self.get_set(p.hi)
@@ -215,6 +201,9 @@ class ZDD():
         return frozenset.union(self.get_set(p.lo), *f1_with_top)
 
     def product(self, p, q):
+        """ return the family of all possible concatenations of
+            any two respective cubes in p and q
+        """
         empty = self.empty()
         base = self.base()
         if p is empty:
@@ -225,7 +214,7 @@ class ZDD():
             return empty
         elif q is base:
             return p
-        elif p.top > q.top:
+        elif p.top < q.top:
             return self.product(q, p)
         else:
             var = p.top
@@ -240,6 +229,12 @@ class ZDD():
             return self.get_node(var, r0, r1)
 
     def division(self, p, q):
+        """ when q includes only one cube, p/q is obtained by extracting
+            a subset of P, which consists of the cubes including all the
+            literals in q's cube, when q consists of multiple cubes,
+            p/q is the intersection of all the quotients dividing p by
+            respective cubes in q
+        """
         empty = self.empty()
         base = self.base()
         if q is base:
@@ -292,6 +287,7 @@ class ZDD():
             return self.get_node(p.top, new_lo, new_hi)
 
     def from_set(self, in_set):
+        """ return the top node of the correstponding ZDD of in_set """
         if in_set == frozenset():
             return self.empty()
         elif in_set == frozenset([frozenset()]):
@@ -333,15 +329,16 @@ if __name__ == '__main__':
     print('b:', zdd.get_set(b))
     c = zdd.get_node(3, a, b)
     print('c:', zdd.get_set(c))
-    d = zdd.union(b, c)
-    print('d: union,', zdd.get_set(d))
+    print('b union c:', zdd.get_set(zdd.union(b, c)))
+    print('b - c:', zdd.get_set(zdd.difference(b, c)))
 
-    e_set = frozenset([frozenset([1, 2, 4]), frozenset([4])])
+    d_set = frozenset([frozenset([1, 2, 3]), frozenset([4])])
+    d = zdd.from_set(d_set)
+    print('d:', zdd.get_set(d))
+
+    e_set = frozenset([frozenset([3])])
     e = zdd.from_set(e_set)
-    print(zdd.get_set(e))
+    print('e:', zdd.get_set(e))
 
-    f_set = frozenset([frozenset([3])])
-    f = zdd.from_set(f_set)
-    print(zdd.get_set(f))
-
-    print(zdd.get_set(zdd.product(e, f)))
+    print('d * e: ', zdd.get_set(zdd.product(d, e)))
+    print('d / e: ', zdd.get_set(zdd.division(d, e)))
