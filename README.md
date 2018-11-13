@@ -7,25 +7,25 @@ Various data structure implementations in Python.
 ### Multiway Trees
 
 - Disjoint-set
-  - [Description](https://en.wikipedia.org/wiki/Disjoint-set_data_structure), [Code](./multiwayTree/disjointSet.py)
+  - [Code](./multiwayTree/disjointSet.py), [Wikipedia](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
 - Fenwick Tree
-  - [Description](./descriptions/FenwickTree.md), [Code](./multiwayTree/fenwickTree.py)
+  - [Description](./descriptions/FenwickTree.md), [Code](./multiwayTree/fenwickTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Fenwick_tree)
 
 ### Binary Search Trees
 
 - Vanilla Binary Search Tree
-  - [Description](https://en.wikipedia.org/wiki/Binary_search_tree), [Code](./binarySearchTree/BST.py)
+  - [Code](./binarySearchTree/BST.py), [Wikipedia](https://en.wikipedia.org/wiki/Binary_search_tree)
 - AVL Tree
-  - [Description](https://en.wikipedia.org/wiki/AVL_tree)
+  - [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree)
 - Red-black Tree
-  - [Description](./descriptions/RedBlackTree.md), [Code](./binarySearchTree/redBlackTree.py)
+  - [Description](./descriptions/RedBlackTree.md), [Code](./binarySearchTree/redBlackTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
 
 ### Space-partitioning Trees
 
 - Segment Tree
-  - [Description](https://en.wikipedia.org/wiki/Segment_tree), [Code](./spacePartitioningTree/segmentTree.py)
+  - [Description](./descriptions/segmentTree.md), [Code](./spacePartitioningTree/segmentTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Segment_tree)
 
 ### Graphs
 
 - Zero-suppressed decision diagram
-  - [Description](https://en.wikipedia.org/wiki/Zero-suppressed_decision_diagram), [Code](./graph/ZDD.py)
+  -  [Description](./descriptions/ZDD.md), [Code](./graph/ZDD.py), [Wikipedia](https://en.wikipedia.org/wiki/Zero-suppressed_decision_diagram)
