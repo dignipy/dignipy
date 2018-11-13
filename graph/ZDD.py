@@ -120,14 +120,12 @@ class ZDD():
 
     def union(self, p, q):
         """ union of 1-paths"""
-        p_node = self.get_node(p.top, p.lo, p.hi)
-        q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
-        if p_node == empty:
+        if p == empty:
             return q
-        elif q_node == empty:
+        elif q == empty:
             return p
-        elif p_node == q_node:
+        elif p == q:
             return p
         elif p.top > q.top:
             return self.get_node(p.top, self.union(p.lo, q), p.hi)
@@ -140,14 +138,12 @@ class ZDD():
 
     def intersection(self, p, q):
         """ intersetction of 1-paths """
-        p_node = self.get_node(p.top, p.lo, p.hi)
-        q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
-        if p_node == empty:
+        if p == empty:
             return empty
-        elif q_node == empty:
+        elif q == empty:
             return empty
-        elif p_node == q_node:
+        elif p == q:
             return p
         elif p.top > q.top:
             return self.intersection(p.lo, q)
@@ -160,14 +156,12 @@ class ZDD():
 
     def difference(self, p, q):
         """ set difference of 1-paths """
-        p_node = self.get_node(p.top, p.lo, p.hi)
-        q_node = self.get_node(q.top, q.lo, q.hi)
         empty = self.empty()
-        if p_node == empty:
+        if p == empty:
             return empty
-        elif q_node == empty:
+        elif q == empty:
             return p
-        elif p_node == q_node:
+        elif p == q:
             return empty
         elif p.top > q.top:
             return self.get_node(p.top, self.difference(p.lo, q), p.hi)
@@ -180,20 +174,18 @@ class ZDD():
 
     def count(self, p):
         """ count the number of 1-paths """
-        p_node = self.get_node(p.top, p.lo, p.hi)
-        if p_node is self.empty():
+        if p is self.empty():
             return 0
-        elif p_node is self.base():
+        elif p is self.base():
             return 1
         else:
             return self.count(p.lo) + self.count(p.hi)
 
     def get_set(self, p):
         """ change ZDD to a corresponding family of sets """
-        p_node = self.get_node(p.top, p.lo, p.hi)
-        if p_node is self.empty():
+        if p is self.empty():
             return frozenset([])  # use frozenset for hashing
-        elif p_node is self.base():
+        elif p is self.base():
             return frozenset([frozenset([])])
         f1 = self.get_set(p.hi)
         top_set = set([p.top])
@@ -256,9 +248,9 @@ class ZDD():
             return result
 
     def remainder(self, p, q):
-        """ calculate p - (p * (p/1)) """
+        """ calculate p - (q * (p/q)) """
         div = self.division(p, q)
-        prod = self.product(p, div)
+        prod = self.product(q, div)
         return self.difference(p, prod)
 
     def is_excluded(self, p, var):
