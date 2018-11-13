@@ -22,12 +22,13 @@ import math
 
 class Interval():
     def __init__(self, left_endpoint, right_endpoint, l_closed, r_closed):
-        self.left_endpoint = left_endpoint
-        self.right_endpoint = right_endpoint
-        self.left_closed = l_closed
-        self.right_closed = r_closed
+        self.left_endpoint = left_endpoint  # float or int
+        self.right_endpoint = right_endpoint  # float or int
+        self.left_closed = l_closed  # bool, whether left enpoint is closed
+        self.right_closed = r_closed  # bool, whether right enpoint is closed
 
     def __repr__(self):
+        """ mathematical representation of an interval """
         s = "{}, {}".format(self.left_endpoint, self.right_endpoint)
         if self.left_closed:
             left_bracket = '['
@@ -42,7 +43,7 @@ class Interval():
         return 'Interval({})'.format(interval_string)
 
     def contains(self, another_interval):
-        """check if this interval contains another_interval"""
+        """ check if this interval contains another_interval """
         if another_interval.left_endpoint < self.left_endpoint:
             return False
         if another_interval.left_endpoint == self.left_endpoint:
@@ -69,9 +70,10 @@ class TreeNode():
         self.right_endpoint = right_endpoint
         self.left_closed = l_closed
         self.right_closed = r_closed
-        self.subset = []
+        self.subset = []  # the canonical subset of given intervals
 
     def __repr__(self):
+        """ mathematical representation of the node's interval """
         s = "{}, {}".format(self.left_endpoint, self.right_endpoint)
         if self.left_closed:
             left_bracket = '['
@@ -86,13 +88,18 @@ class TreeNode():
         return 'TreeNode({})'.format(interval_string)
 
     def query(self, point):
-        """return list of Interval objects containing point in the subtree"""
+        """ return list of Interval objects containing point in the subtree """
         point_interval = Interval(point, point, True, True)
+        # point is also a closed interval [p, p]
+
+        if not self.interval.contains(point_interval):
+            # this node's interval doesn't contain point
+            return []
+
         found = []
         for intv in self.subset:
             found.append(intv)
-        if not self.interval.contains(point_interval):
-            return []
+            # because intv contains the node's interval, which contains point
         if self.left is not None:
             for intv in self.left.query(point):
                 found.append(intv)
@@ -109,16 +116,18 @@ class SegmentTree():
         self.build_tree()
 
     def query(self, point):
-        """return list of all Interval objects containing point"""
+        """ return list of all Interval objects containing point """
         if self.root is None:
             raise Exception('tree must be built first')
         return self.root.query(point)
 
     def build_tree(self):
-        """Build segment tree from given intervals.
-        Takes O(n log(n)) time.
+        """ Build segment tree from given intervals and return the root.
+            Takes O(n log(n)) time.
         """
         intervals = self.intervals
+
+        # sort all endpoints and make intervals for leaf nodes
         endpoints = []
         for interval in intervals:
             endpoints.append(interval.left_endpoint)
@@ -134,6 +143,10 @@ class SegmentTree():
             else:
                 unique_endpoints.append(ep)
 
+
+        # append tuples for making intervals:
+        # (left_endpoint, right_endpoint, l_closed, r_closed)
+        # if left_enpoint == right_endpoint: it represents a point
         endpoints = unique_endpoints
         elements = []
         for i, ep in enumerate(endpoints):
@@ -153,6 +166,8 @@ class SegmentTree():
         num_last_leaves = 2 * (num_leaves - 2**(max_depth - 1))
 
         # build tree from bottom to up
+
+        # make a queue for each depth
         q = []
         for i, elem in enumerate(elements):
             if i < num_last_leaves:
@@ -169,6 +184,7 @@ class SegmentTree():
                 node = TreeNode(*elem)
                 q.append(node)
 
+        # while depth > 0
         while len(q) > 1:
             tmp_q = []
             for i, node in enumerate(q):
@@ -187,6 +203,7 @@ class SegmentTree():
 
         self.root = q[0]
 
+        # add canonical subsets
         for interval in intervals:
             self._append_subset(self.root, interval)
 
