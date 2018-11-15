@@ -26,13 +26,14 @@ class Node():
         return 'Node({},{})'.format(self.key, repr(self.value))
 
 
-class BST():  # collections.abc.MutableMapping
+class BST(collections.abc.MutableMapping):
     def __init__(self, key, value):
         self.root = Node(key, value)
+        self._len = 1  # the root
 
     def _key_check(self, key):
         """ check key type and raise error if not valid"""
-        if isinstance(key, str) or isinstance(key, float):
+        if isinstance(key, int) or isinstance(key, float):
             pass
         else:
             raise TypeError("a BST key must be a number")
@@ -47,7 +48,7 @@ class BST():  # collections.abc.MutableMapping
         self._insert(self.root, key, value)
 
     def __delitem__(self, key):
-        self._insert(self.root, key, value)
+        self._key_check(key)
         self._delete(self.root, key)
 
     def __iter__(self):
@@ -61,6 +62,9 @@ class BST():  # collections.abc.MutableMapping
                 iter_queue.append(node.left)
             if node.right is not None:
                 iter_queue.append(node.right)
+
+    def __len__(self):
+        return self._len
 
     def search(self, key):
         """get the value of a matched node"""
@@ -82,6 +86,8 @@ class BST():  # collections.abc.MutableMapping
 
     def _insert(self, node, key, value):
         if node is None:
+            self._len += 1
+            # make new node
             return Node(key, value)
         if key < node.key:
             node.left = self._insert(node.left, key, value)
@@ -110,7 +116,12 @@ class BST():  # collections.abc.MutableMapping
 
     def _delete_min(self, node):
         if node.left is None:
-            return node.right
+            if node.right is None:
+                # last node
+                self._len -= 1
+                return None
+            else:
+                return node.right
         node.left = self._delete_min(node.left)
         return node
 
@@ -131,13 +142,17 @@ class BST():  # collections.abc.MutableMapping
             node.right = self._delete(node.right, key)
         else:
             if node.right is None:
+                self._len -= 1
                 return node.left
-            if node.left is None:
+            elif node.left is None:
+                self._len -= 1
                 return node.right
-            target = node
-            node = self._min(target.right)
-            node.right = self._delete_min(target.right)
-            node.left = target.left
+            else:
+                target = node
+                node = self._min(target.right)
+                node.right = self._delete_min(target.right)
+                # _len decreased
+                node.left = target.left
         return node
 
 
@@ -160,5 +175,30 @@ if __name__ == '__main__':
 
     bst.delete(12)
     print('after delete 12')
+    bst_utils.in_order(bst.root)
+
+    print()
+    print('----new test----')
+    print()
+    bst = BST(12, 'a')
+    bst[10] = 'b'
+    bst[15] = 'c'
+    bst[16] = 'd'
+    bst[5] = 'e'
+    bst[14] = 'f'
+
+    print('after insertion')
+    print('size', len(bst))
+
+    bst_utils.in_order(bst.root)
+
+    bst.delete_min()
+    print('after deleting min')
+    print('size', len(bst))
+    bst_utils.in_order(bst.root)
+
+    del bst[12]
+    print('after delete 12')
+    print('size', len(bst))
     bst_utils.in_order(bst.root)
 
