@@ -30,24 +30,37 @@ class BST():  # collections.abc.MutableMapping
     def __init__(self, key, value):
         self.root = Node(key, value)
 
-    def __getitem__(self, key):
+    def _key_check(self, key):
+        """ check key type and raise error if not valid"""
         if isinstance(key, str) or isinstance(key, float):
-            item = self._search(self.root, key)
-            return item
+            pass
         else:
             raise TypeError("a BST key must be a number")
+
+    def __getitem__(self, key):
+        self._key_check(key)
+        item = self._search(self.root, key)
+        return item
 
     def __setitem__(self, key, value):
-        if isinstance(key, str) or isinstance(key, float):
-            self._insert(self.root, key, value)
-        else:
-            raise TypeError("a BST key must be a number")
+        self._key_check(key)
+        self._insert(self.root, key, value)
 
     def __delitem__(self, key):
-        if isinstance(key, str) or isinstance(key, float):
-            self._delete(self.root, key)
-        else:
-            raise TypeError("a BST key must be a number")
+        self._insert(self.root, key, value)
+        self._delete(self.root, key)
+
+    def __iter__(self):
+        """iterate over keys preorder"""
+        iter_queue = collections.deque()
+        iter_queue.append(self.root)
+        while iter_queue:
+            node = iter_queue.popleft()
+            yield node.key
+            if node.left is not None:
+                iter_queue.append(node.left)
+            if node.right is not None:
+                iter_queue.append(node.right)
 
     def search(self, key):
         """get the value of a matched node"""
@@ -148,5 +161,4 @@ if __name__ == '__main__':
     bst.delete(12)
     print('after delete 12')
     bst_utils.in_order(bst.root)
-
 
