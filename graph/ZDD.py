@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import collections
 import weakref
 
 
@@ -31,6 +32,27 @@ class ZDD():
         self._base = None
         self._empty = None
         self._next_unique_key = 0
+        self._cache_dict = collections.defaultdict(weakref.WeakValueDictionary)
+
+    def _cache(cache_string, num_nodes=2):
+        def decorator(function):
+            def wrapper(*args, **kwargs):
+                this = args[0]
+                this_cache = this._cache_dict[cache_string]
+                keys = []
+                for i in range(num_nodes):
+                    node = args[i+1]
+                    node_key = node._unique_key
+                    keys.append(node_key)
+                dict_key = tuple(keys)
+                if dict_key in this_cache:
+                    return this_cache[dict_key]
+                else:
+                    result = function(*args, **kwargs)
+                    this_cache[dict_key] = result
+                    return result
+            return wrapper
+        return decorator
 
     def get_node(self, top, p0, p1):
         """ function to take care of all node creation and access """
@@ -118,6 +140,7 @@ class ZDD():
             hi_change = self.change(p.hi, var)
             return self.get_node(p.top, lo_change, hi_change)
 
+    @_cache('union')
     def union(self, p, q):
         """ union of 1-paths"""
         empty = self.empty()
@@ -136,6 +159,7 @@ class ZDD():
             hi_union = self.union(p.hi, q.hi)
             return self.get_node(p.top, lo_union, hi_union)
 
+    @_cache('intersection')
     def intersection(self, p, q):
         """ intersetction of 1-paths """
         empty = self.empty()
@@ -154,6 +178,7 @@ class ZDD():
             hi_intersect = self.intersection(p.hi, q.hi)
             return self.get_node(p.top, lo_intersect, hi_intersect)
 
+    @_cache('difference')
     def difference(self, p, q):
         """ set difference of 1-paths """
         empty = self.empty()
@@ -192,6 +217,7 @@ class ZDD():
         f1_with_top = [frozenset([s.union(top_set)]) for s in f1]
         return frozenset.union(self.get_set(p.lo), *f1_with_top)
 
+    @_cache('product')
     def product(self, p, q):
         """ return the family of all possible concatenations of
             any two respective cubes in p and q
@@ -220,6 +246,7 @@ class ZDD():
             r1 = self.union(tmp2, self.product(p0, q1))
             return self.get_node(var, r0, r1)
 
+    @_cache('division')
     def division(self, p, q):
         """ when q includes only one cube, p/q is obtained by extracting
             a subset of P, which consists of the cubes including all the
@@ -247,6 +274,7 @@ class ZDD():
                 result = self.intersection(result, div)
             return result
 
+    @_cache('remainder')
     def remainder(self, p, q):
         """ calculate p - (q * (p/q)) """
         div = self.division(p, q)
@@ -334,3 +362,4 @@ if __name__ == '__main__':
 
     print('d * e: ', zdd.get_set(zdd.product(d, e)))
     print('d / e: ', zdd.get_set(zdd.division(d, e)))
+
