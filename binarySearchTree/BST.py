@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 """BST.py
 
 This module implements vanilla Binary Search Tree
 
 all of the operations(searching, inserting, deleting) takes O(h) time
 
-tree's height: ceil(log(N+1)) <= h <= N 
+tree's height: ceil(log(N+1)) <= h <= N
 - best case: full binary tree
 - worst case: skewed binary tree
 
 """
 
+import collections
 import bst_utils
 
 
@@ -19,19 +21,38 @@ class Node():
         self.value = value
         self.left = None
         self.right = None
-    
+
     def __repr__(self):
         return 'Node({},{})'.format(self.key, repr(self.value))
 
 
-class BST():
+class BST():  # collections.abc.MutableMapping
     def __init__(self, key, value):
         self.root = Node(key, value)
-        
+
+    def __getitem__(self, key):
+        if isinstance(key, str) or isinstance(key, float):
+            item = self._search(self.root, key)
+            return item
+        else:
+            raise TypeError("a BST key must be a number")
+
+    def __setitem__(self, key, value):
+        if isinstance(key, str) or isinstance(key, float):
+            self._insert(self.root, key, value)
+        else:
+            raise TypeError("a BST key must be a number")
+
+    def __delitem__(self, key):
+        if isinstance(key, str) or isinstance(key, float):
+            self._delete(self.root, key)
+        else:
+            raise TypeError("a BST key must be a number")
+
     def search(self, key):
         """get the value of a matched node"""
         return self._search(self.root, key)
-    
+
     def _search(self, node, key):
         if node is None:
             return None
@@ -45,7 +66,7 @@ class BST():
     def insert(self, key, value):
         """insert a new node, or update the value of existed node"""
         self.root = self._insert(self.root, key, value)
-    
+
     def _insert(self, node, key, value):
         if node is None:
             return Node(key, value)
@@ -56,33 +77,33 @@ class BST():
         else:
             node.value = value
         return node
-    
+
     def min(self):
         """get a node which has the minimum key"""
         if self.root is None:
             return None
         return self._min(self.root)
-    
+
     def _min(self, node):
         if node.left is None:
             return node
         return self._min(node.left)
-    
+
     def delete_min(self):
         """delete a node which has the minimum key"""
         if self.root is None:
             print("Empty Tree")
         self.root = self._delete_min(self.root)
-    
+
     def _delete_min(self, node):
         if node.left is None:
             return node.right
         node.left = self._delete_min(node.left)
         return node
-    
+
     def delete(self, key):
         self.root = self._delete(self.root, key)
-    
+
     def _delete(self, node, key):
         """
         case 0: target node has no child
@@ -127,4 +148,5 @@ if __name__ == '__main__':
     bst.delete(12)
     print('after delete 12')
     bst_utils.in_order(bst.root)
+
 
