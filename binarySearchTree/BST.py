@@ -12,6 +12,7 @@ tree's height: ceil(log(N+1)) <= h <= N
 """
 
 import collections
+from collections import abc
 import bst_utils
 
 
@@ -26,7 +27,7 @@ class Node():
         return 'Node({},{})'.format(self.key, repr(self.value))
 
 
-class BST(collections.abc.MutableMapping):
+class BST(abc.MutableMapping):
     def __init__(self, key, value):
         self.root = Node(key, value)
         self._len = 1  # the root
@@ -116,9 +117,9 @@ class BST(collections.abc.MutableMapping):
 
     def _delete_min(self, node):
         if node.left is None:
+            # last node
+            self._len -= 1
             if node.right is None:
-                # last node
-                self._len -= 1
                 return None
             else:
                 return node.right
