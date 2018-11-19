@@ -47,8 +47,8 @@ Definitions are well explained in the Wikipedia link above. The structure of the
   - The canonical family is `{{1}, {2}}`
 
 - The ZDD below represents the function:
-  - ![ZDDfunction3](./ZDDFunction3.png)
-  - ![ZDD3](./ZDDImage3.png)
+  - ![ZDDfunction3](./ZDDFunction-3.png)
+  - ![ZDD3](./ZDDImage-3.png)
   - The canonical family is `{{1}, {2}, {1, 2}}`
 
 - [N Queens Puzzle](./nQueens.ipynb)
