@@ -29,8 +29,9 @@ Definitions are well explained in the Wikipedia link above. The structure of the
     - A variable `x` is `False` if it is not present in the path.
   - Canonical family of sets to Boolean function:
     - Every set in the canonical family represents a combination of input values of the Boolean function which makes the output value `True`.
-    - The variables in a set represents the variables that needs to be True to make the output `True`, and all other variables needs to be `False`.
-    - For example, the empty set represents that every variable has `False` value.
+    - The variables in a set represents the variables that needs to be `True` to make the output `True`, and all other variables needs to be `False`.
+    - For example, the empty set represents that every variable should be `False` to make the output `True`.
+
 # Methods
 - To do
 
