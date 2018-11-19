@@ -12,5 +12,7 @@ A segment tree is built from a given set `I` of intervals. The leaves are the so
 
 A node in a segment tree represents an interval, which can have any combination of open or closed endpoints. Also, a subset of the given set `I` is assigned to each node. This `canonical subset` contains the intervals from `I` that contains the interval of the node, but does not contain the interval of the parent node. Thus, viewed from the top, an interval `intv` from `I` relates to the first nodes that are contained in `intv`.
 
+For example, given the list of intervals `[[0,1], [1,3], [3,6], [1,7], [3,4], [4,5]]`  
+
 # Querying
-`Under construction`
+Querying a point returns the intervals of `I` which contains the point. Like binary search trees, the path to the leaf node containing the point is followed. While continuing down the path, collect the canonical subsets of the nodes. Those subsets contain the interval of the node, which contains the query point.
