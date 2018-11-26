@@ -50,7 +50,7 @@ class BST(abc.MutableMapping):
 
     def __delitem__(self, key):
         self._key_check(key)
-        self._delete(self.root, key)
+        self.root = self._delete(self.root, key)
 
     def __iter__(self):
         """iterate over keys preorder"""
