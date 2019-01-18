@@ -1,13 +1,13 @@
 """bst_utils.py
 
-This module implements common methods for visiting Binary Search Tree's nodes 
+This module implements common methods for visiting Binary Search Tree's nodes
 
 """
 
 
 def in_order(node, function=None):
     if node is None:
-        return 
+        return
     in_order(node.left, function=function)
     if not function:
         print(node)
@@ -17,19 +17,19 @@ def in_order(node, function=None):
 
 def pre_order(node, function=None):
     if node is None:
-        return 
+        return
     if not function:
         print(node)
     else:
         function(node)
-    in_order(node.left, function=function)
-    in_order(node.right, function=function)
+    pre_order(node.left, function=function)
+    pre_order(node.right, function=function)
 
 def post_order(node, function=None):
     if node is None:
-        return 
-    in_order(node.left, function=function)
-    in_order(node.right, function=function)
+        return
+    post_order(node.left, function=function)
+    post_order(node.right, function=function)
     if not function:
         print(node)
     else:
