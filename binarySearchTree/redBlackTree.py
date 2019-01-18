@@ -49,14 +49,21 @@ class RedBlackTree():
         return self._search(self.root, key)
     
     def _search(self, node, key):
-        if node is None:
+        searched, parent = self._search_node(node, key)
+        if searched is None:
             return None
-        if key < node.key:
-            return search(node.left, key)
-        elif key > node.key:
-            return search(node.right, key)
         else:
-            return node.value
+            return searched.value
+
+    def _search_node(self, node, key, parent=None):
+        if node is None:
+            return None, None
+        if key < node.key:
+            return self._search(node.left, key, parent=node)
+        elif key > node.key:
+            return self._search(node.right, key, parent=node)
+        else:
+            return node, parent
 
     def rotate_left(self, node):
         """
@@ -135,6 +142,23 @@ class RedBlackTree():
             self.flip_colors(node)
         return node
 
+    def move_red_right(self, node):
+        """
+        make the red color node on the right side for deleting a node 
+        """
+        self.flip_colors(node)
+        if self.is_red(node.left.left):
+            node = self.rotate_right(node)
+            self.flip_colors(node)
+        return node
+
+    def minimum_node(self, node):
+        """get the minimum key node from the subtree"""
+        if node.left is None:
+            return node
+        else:
+            return self.minimum_node(node.left)
+
     def delete_min(self):
         """delete a node which has the min key"""
         self.root = self._delete_min(self.root)
@@ -158,6 +182,32 @@ class RedBlackTree():
             self.flip_colors(node)
         return node
 
+    def _delete(self, node, key):
+        if key < node.key:
+            if node.left is None:
+                raise KeyError(key)
+            if not (self.is_red(node.left)) and (not self.is_red(node.left.left)):
+                node = self.move_red_left(node)
+            node.left = self._delete(node.left, key)
+        else:
+            if self.is_red(node.left):
+                node = self.rotate_right(node)
+            if key == node.key and node.right is None:
+                return None
+            elif node.right is None:
+                raise KeyError(key)
+            elif (not self.is_red(node.right)) and (not self.is_red(node.right.left)):
+                node = self.move_red_right(node)
+            
+            if key == node.key:
+                min_node = self.minimum_node(node)
+                node.key = min_node.key
+                node.value = min_node.value
+                node.right = self._delete_min(node.right)
+            else:
+                node.right = self._delete(node.right, key)
+            return self.fix_up(node)
+        
 
 if __name__ == '__main__':
     """test"""
@@ -169,10 +219,21 @@ if __name__ == '__main__':
     rbt.insert(18, 'E')
 
     print('after insertion')
-    bst_utils.in_order(rbt.root)
+    #bst_utils.pre_order(rbt.root)
+    bst_utils.print_tree(rbt.root)
 
     print('delete min')
     rbt.delete_min()
 
-    bst_utils.in_order(rbt.root)
+    print('after deletion')
+    #bst_utils.pre_order(rbt.root)
+    bst_utils.print_tree(rbt.root)
+
+    print('delete 15')
+    rbt._delete(rbt.root, 15)
+
+    print('after deletion')
+    #bst_utils.pre_order(rbt.root)
+    bst_utils.print_tree(rbt.root)
+
     print('abc', rbt.root.left.right)
