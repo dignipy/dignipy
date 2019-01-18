@@ -49,14 +49,21 @@ class RedBlackTree():
         return self._search(self.root, key)
     
     def _search(self, node, key):
-        if node is None:
+        searched, parent = self._search_node(node, key)
+        if searched is None:
             return None
-        if key < node.key:
-            return search(node.left, key)
-        elif key > node.key:
-            return search(node.right, key)
         else:
-            return node.value
+            return searched.value
+
+    def _search_node(self, node, key, parent=None):
+        if node is None:
+            return None, None
+        if key < node.key:
+            return self._search(node.left, key, parent=node)
+        elif key > node.key:
+            return self._search(node.right, key, parent=node)
+        else:
+            return node, parent
 
     def rotate_left(self, node):
         """
@@ -135,6 +142,13 @@ class RedBlackTree():
             self.flip_colors(node)
         return node
 
+    def minimum_node(self, node):
+        """get the minimum key node from the subtree"""
+        if node.left is None:
+            return node
+        else:
+            return self.minimum_node(node.left)
+
     def delete_min(self):
         """delete a node which has the min key"""
         self.root = self._delete_min(self.root)
@@ -157,7 +171,34 @@ class RedBlackTree():
         if self.is_red(node.left) and self.is_red(node.right):
             self.flip_colors(node)
         return node
-
+    
+    def delete_tmp(self, key):
+        changing_node, parent = self._search_node(self.root, key)
+        left_change = (parent.left == changing_node)
+        if changing_node is None:
+            raise KeyError(key)
+        elif changing_node.right is None:
+            if self.is_red(changing_node):
+                if left_change:
+                    parent.left = changing_node.left
+                else:
+                    parent.right = changing_node.left
+            elif self.is_red(changing_node.left):
+                changing_node.left.color = BLACK
+                if left_change:
+                    parent.left = changing_node.left
+                else:
+                    parent.right = changing_node.left
+            else: # both black
+                pass
+                # ToDo
+        else:
+            min_node = self.minimum_node(changing_node.right)
+            # copy node key, value
+            changing_node.key = min_node.key
+            changing_node.value = min_node.value
+            changing_node.right = self._delete_min(changing_node.right)
+        
 
 if __name__ == '__main__':
     """test"""
