@@ -3,7 +3,6 @@
 This module implements Left-Leaning Red-Black Tree (LLRB)
 
 insertion & deletion takes only O(h) time 
-- [TODO] implement delete() using delete_min()
 
 height of the RBT(N nodes) is not bigger than 2logN
 - if there are no RED nodes in the tree, h = logN
@@ -59,11 +58,47 @@ class RedBlackTree():
         if node is None:
             return None, None
         if key < node.key:
-            return self._search(node.left, key, parent=node)
+            return self._search_node(node.left, key, parent=node)
         elif key > node.key:
-            return self._search(node.right, key, parent=node)
+            return self._search_node(node.right, key, parent=node)
         else:
             return node, parent
+
+    def search_less_near(self, key):
+        return self._search_less_near(self.root, key)
+
+    def _search_less_near(self, node, key, largest=None):
+        """
+        search for the node that has smaller and nearest key (not equal)
+        """
+        if node is None:
+            return largest
+        elif key < node.key:
+            return self._search_less_near(node.left, key, largest=largest)
+        elif key > node.key:
+            if largest is None or largest.key < node.key:
+                largest = node
+            return self._search_less_near(node.right, key, largest=largest)
+        else:
+            return self._search_less_near(node.left, key, largest=largest)
+
+    def search_greater_near(self, key):
+        return self._search_greater_near(self.root, key)
+
+    def _search_greater_near(self, node, key, smallest=None):
+        """
+        search for the node that has greater and nearest key (not equal)
+        """
+        if node is None:
+            return smallest
+        elif key < node.key:
+            if smallest is None or smallest.key > node.key:
+                smallest = node
+            return self._search_greater_near(node.left, key, smallest=smallest)
+        elif key > node.key:
+            return self._search_greater_near(node.right, key, smallest=smallest)
+        else:
+            return self._search_greater_near(node.right, key, smallest=smallest)
 
     def rotate_left(self, node):
         """
@@ -217,6 +252,8 @@ if __name__ == '__main__':
     rbt.insert(15, 'C')
     rbt.insert(16, 'D')
     rbt.insert(18, 'E')
+    
+    print(rbt._search_less_near(rbt.root, 12))
 
     print('after insertion')
     #bst_utils.pre_order(rbt.root)
