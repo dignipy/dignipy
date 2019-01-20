@@ -17,6 +17,8 @@ import redBlackTree
 class OddEvenJump():
     def __init__(self, A):
         rbt = redBlackTree.RedBlackTree()
+        
+        keys = set()
 
         odd_jump = [-1]*len(A)
         even_jump = [-1]*len(A)
@@ -24,7 +26,11 @@ class OddEvenJump():
         for i in range(len(A)):
             idx = len(A) - 1 - i
             key = A[idx]
-            searched = rbt.search(key)
+
+            if key in keys:
+                searched = rbt.search(key)
+            else:
+                searched = None
             if searched is None:
                 # no same key
                 greater = rbt.search_greater_near(key)
@@ -46,6 +52,7 @@ class OddEvenJump():
                 odd_jump[idx] = searched
                 even_jump[idx] = searched
             rbt.insert(key, idx)
+            keys.add(key)
         self.odd_jump = odd_jump
         self.even_jump = even_jump
         self.A = A
@@ -89,6 +96,7 @@ class elapsed_time:
     def __init__(self):
         self.start = None
         self.end = None
+        self.elapsed = None
         self.memo = ''
         
     def __enter__(self):
@@ -99,28 +107,26 @@ class elapsed_time:
     def __exit__(self, type, value, traceback):
         # tear things down
         self.end = time.time()
+        self.elapsed = self.end - self.start
         #print(self.end - self.start, 'time elapsed', self.memo)
 
-def time_complexity(length):
-    A = list(range(length))
-    random.shuffle(A)
-    
-    # print(list(zip(A, odd_jump, range(len(A)))))
+def time_complexity(A):
     with elapsed_time() as timer:
         timer.memo = str(len(A))
         oej = OddEvenJump(A)
+        oej.good_count()
         #odd_jump = get_jump(A, next_odd_jump)
-    elapsed = timer.end - timer.start
-
+    elapsed = timer.elapsed
     return elapsed
 
-for p in range(1, 7):
-    time_list = []
-    length = 10**p
-    for batch in range(100):
-        elapsed = time_complexity(length)
-        time_list.append(elapsed)
-        if elapsed == None:
-            print(batch)
-    print('average {}s, length={}'.format(sum(time_list)/len(time_list), length))
+if __name__ == "__main__":
+    for p in range(1, 7):
+        time_list = []
+        length = 10**p
+        A = list(range(length))
+        random.shuffle(A)
+        for batch in range(10):
+            elapsed = time_complexity(A)
+            time_list.append(elapsed)
+        print('average {}s, length={}'.format(sum(time_list)/len(time_list), length))
 
