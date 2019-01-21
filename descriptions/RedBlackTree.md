@@ -27,5 +27,4 @@
 - runs in O(log n) time
 
 ## delete(key)
-- runs in O(n) time
-- [TODO]
+- runs in O(log n) time
