@@ -14,6 +14,10 @@ built in O(n log n) time. Segment trees support searching for all the intervals
 that contain a query point in O(log n + k), k being the number of retrieved
 intervals or segments.
 
+For multi dimensional implementation, there are some modifications to some of
+the object like axis index. However 1-dim segment tree is still available, and
+segmentTree.py is redundant.
+
 """
 
 import math
@@ -74,7 +78,7 @@ class Cube():
     
 
 class TreeNode():
-    def __init__(self, intv):
+    def __init__(self, left_endpoint, right_endpoint, l_closed, r_closed):
         self.left = None
         self.right = None
         intv = Interval(left_endpoint, right_endpoint, l_closed, r_closed)
