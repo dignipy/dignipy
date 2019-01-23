@@ -74,7 +74,8 @@ class Cube():
             interval.cube = self
     
     def __repr__(self):
-        return repr(slef.sides)
+        intervals = [repr(intv) for intv in self.sides]
+        return 'Cube({})'.format(', '.join(intervals))
     
 
 class TreeNode():
