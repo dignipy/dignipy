@@ -66,12 +66,13 @@ class Interval():
 
 
 class Cube():
-    """ n dimensional cube which is a product of intervals"""
+    """ n-dimensional cube which is a product of intervals"""
     def __init__(self, *args):
         self.dimension = len(args)
         self.sides = args
         for axis, interval in enumerate(args):
             interval.cube = self
+            interval.axis = axis
     
     def __repr__(self):
         return 'Cube'+repr(tuple(self.sides))
@@ -238,6 +239,13 @@ class SegmentTree():
             self._append_subset(node.left, interval)
         if node.right is not None:
             self._append_subset(node.right, interval)
+    
+    def traverse(self, node, function):
+        function(node)
+        if node.left is not None:
+            self.traverse(node.left, function)
+        if node.right is not None:
+            self.traverse(node.right, function)
 
 
 if __name__ == '__main__':
@@ -254,3 +262,34 @@ if __name__ == '__main__':
     print('intervals:', intervals)
     seg_tree = SegmentTree(intervals)
     print('intervals containing 34:', seg_tree.query(34))
+
+    rectangles = []
+    for _ in range(3):
+        rect = []
+        for _ in range(2):
+            endpoints = []
+            endpoints.append(random.choice(list(range(100))))
+            endpoints.append(random.choice(list(range(100))))
+            l_closed = random.choice([False, True])
+            r_closed = random.choice([False, True])
+            intv = Interval(min(endpoints), max(endpoints), l_closed, r_closed)
+            rect.append(intv)
+        rectangles.append(Cube(*rect))
+
+    def attach_seg_tree(node):
+        """ attach a new segment tree to every TreeNode of the segment tree in dim 0 """
+        axis = 1
+        node.axis = axis
+        cannonical_subset = node.subset
+        cubes = [intv.cube for intv in cannonical_subset]
+        intervals = [c.sides[axis] for c in cubes]
+        node.next_axis_tree = SegmentTree(intervals)
+        
+    dim = 0
+    seg_tree_0 = SegmentTree([c.sides[dim] for c in rectangles])
+    seg_tree_0.traverse(seg_tree_0.root, attach_seg_tree)
+    
+    print(rectangles)
+    print('querying (40, ?)')
+    intervals0 = seg_tree_0.query(40)
+    print('intervals containing x=40', intervals0)
