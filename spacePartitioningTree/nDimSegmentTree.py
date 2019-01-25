@@ -140,14 +140,13 @@ class TreeNode():
         if self.left is not None:
             if self.left.interval.contains(point_interval):
                 return self.left.path_to_leaf(point, prev_path=prev_path)
-        else:
-            return prev_path
         if self.right is not None:
             if self.right.interval.contains(point_interval):
                 return self.right.path_to_leaf(point, prev_path=prev_path)
+            else:
+                return []
         else:
             return prev_path
-        return []
 
 
 class SegmentTree():
@@ -313,7 +312,7 @@ if __name__ == '__main__':
     seg_tree_0.traverse(seg_tree_0.root, attach_seg_tree)
     
     print(rectangles)
-    print('querying (40, 50)')
+    print('querying (40, 50)...')
     x = 40
     y = 50
     intervals0 = seg_tree_0.query(x)
