@@ -67,10 +67,10 @@ class Interval():
 
 class Cube():
     """ n-dimensional cube which is a product of intervals"""
-    def __init__(self, *args):
-        self.dimension = len(args)
-        self.sides = args
-        for axis, interval in enumerate(args):
+    def __init__(self, sides):
+        self.dimension = len(sides)
+        self.sides = sides
+        for axis, interval in enumerate(sides):
             interval.cube = self
             interval.axis = axis
     
@@ -129,6 +129,26 @@ class TreeNode():
                 found.append(intv)
         return found
 
+    def path_to_leaf(self, point, prev_path=None):
+        point_interval = Interval(point, point, True, True)
+
+        if prev_path is None:
+            prev_path = [self]
+        else:
+            prev_path.append(self)
+
+        if self.left is not None:
+            if self.left.interval.contains(point_interval):
+                return self.left.path_to_leaf(point, prev_path=prev_path)
+        else:
+            return prev_path
+        if self.right is not None:
+            if self.right.interval.contains(point_interval):
+                return self.right.path_to_leaf(point, prev_path=prev_path)
+        else:
+            return prev_path
+        return []
+
 
 class SegmentTree():
     def __init__(self, intervals):
@@ -141,6 +161,9 @@ class SegmentTree():
         if self.root is None:
             raise Exception('tree must be built first')
         return self.root.query(point)
+    
+    def root_to_leaf(self, point):
+        return self.root.path_to_leaf(point)
 
     def build_tree(self):
         """ Build segment tree from given intervals and return the root.
@@ -274,22 +297,34 @@ if __name__ == '__main__':
             r_closed = random.choice([False, True])
             intv = Interval(min(endpoints), max(endpoints), l_closed, r_closed)
             rect.append(intv)
-        rectangles.append(Cube(*rect))
+        rectangles.append(Cube(rect))
 
     def attach_seg_tree(node):
         """ attach a new segment tree to every TreeNode of the segment tree in dim 0 """
-        axis = 1
+        axis = 0
         node.axis = axis
         cannonical_subset = node.subset
         cubes = [intv.cube for intv in cannonical_subset]
         intervals = [c.sides[axis] for c in cubes]
         node.next_axis_tree = SegmentTree(intervals)
-        
+
     dim = 0
     seg_tree_0 = SegmentTree([c.sides[dim] for c in rectangles])
     seg_tree_0.traverse(seg_tree_0.root, attach_seg_tree)
     
     print(rectangles)
-    print('querying (40, ?)')
-    intervals0 = seg_tree_0.query(40)
-    print('intervals containing x=40', intervals0)
+    print('querying (40, 50)')
+    x = 40
+    y = 50
+    intervals0 = seg_tree_0.query(x)
+    print('intervals in axis=0 containing x=40', intervals0)
+    
+    selected_cubes = []
+    path = seg_tree_0.root_to_leaf(x)
+    for node in path:
+        sub_seg_tree = node.next_axis_tree
+        intervals1 = sub_seg_tree.query(y)
+        for intv in intervals1:
+            c = intv.cube
+            selected_cubes.append(c)
+    print('found cubes', selected_cubes)
