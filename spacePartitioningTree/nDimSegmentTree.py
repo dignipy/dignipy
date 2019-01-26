@@ -20,6 +20,7 @@ segmentTree.py is redundant.
 
 """
 
+from functools import partial
 import math
 
 
@@ -263,11 +264,30 @@ class SegmentTree():
             self._append_subset(node.right, interval)
     
     def traverse(self, node, function):
+        """ traverse the subtree of the node and apply function(node)"""
         function(node)
         if node.left is not None:
             self.traverse(node.left, function)
         if node.right is not None:
             self.traverse(node.right, function)
+
+    def attach_one_tree(self, node, axis):
+        """ attach a new segment tree to every TreeNode of the segment tree in axis=axis """
+        # ToDo: too many dependencies between objects (Cube, Interval, TreeNode, ...)
+        node.axis = axis
+        cannonical_subset = node.subset
+        cubes = [intv.cube for intv in cannonical_subset]
+        intervals = [c.sides[axis] for c in cubes]
+        node.next_axis_tree = SegmentTree(intervals)
+        
+    def get_attach_function(self, axis):
+        """ attach_one_tree function for nodes in axis=axis """
+        return partial(self.attach_one_tree, axis=axis)
+    
+    def attach_all_trees(self, axis):
+        """ attach segment trees to each nodes """
+        self.traverse(self.root, self.get_attach_function(axis))
+
 
 
 if __name__ == '__main__':
@@ -298,18 +318,10 @@ if __name__ == '__main__':
             rect.append(intv)
         rectangles.append(Cube(rect))
 
-    def attach_seg_tree(node):
-        """ attach a new segment tree to every TreeNode of the segment tree in dim 0 """
-        axis = 0
-        node.axis = axis
-        cannonical_subset = node.subset
-        cubes = [intv.cube for intv in cannonical_subset]
-        intervals = [c.sides[axis] for c in cubes]
-        node.next_axis_tree = SegmentTree(intervals)
-
+    # build trees
     dim = 0
     seg_tree_0 = SegmentTree([c.sides[dim] for c in rectangles])
-    seg_tree_0.traverse(seg_tree_0.root, attach_seg_tree)
+    seg_tree_0.attach_all_trees(dim)
     
     print(rectangles)
     print('querying (40, 50)...')
