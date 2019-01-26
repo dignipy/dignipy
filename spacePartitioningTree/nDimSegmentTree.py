@@ -22,6 +22,7 @@ segmentTree.py is redundant.
 
 from functools import partial
 import math
+import weakref
 
 
 class Interval():
@@ -30,8 +31,6 @@ class Interval():
         self.right_endpoint = right_endpoint  # float or int
         self.left_closed = l_closed  # bool, whether left enpoint is closed
         self.right_closed = r_closed  # bool, whether right enpoint is closed
-        self.cube = None  # the cube which this interval belongs as a side
-        self.axis = None
 
     def __repr__(self):
         """ mathematical representation of an interval """
@@ -68,15 +67,22 @@ class Interval():
 
 class Cube():
     """ n-dimensional cube which is a product of intervals"""
+    interval2cube = weakref.WeakValueDictionary() # Globally accessable with Cube class
+
     def __init__(self, sides):
         self.dimension = len(sides)
         self.sides = sides
+        self.interval2axis = dict()
         for axis, interval in enumerate(sides):
-            interval.cube = self
-            interval.axis = axis
+            self.interval2cube[id(interval)] = self
+            self.interval2axis[id(interval)] = axis
     
     def __repr__(self):
         return 'Cube'+repr(tuple(self.sides))
+    
+    @classmethod
+    def find_cube(cls, interval):
+        return cls.interval2cube[id(interval)]
     
 
 class TreeNode():
@@ -90,9 +96,6 @@ class TreeNode():
         self.left_closed = l_closed
         self.right_closed = r_closed
         self.subset = []  # the canonical subset of given intervals
-
-        self.axis = None # axis this tree belongs to
-        self.next_axis_tree = None  # sub segment tree for this node in next axis
 
     def __repr__(self):
         """ mathematical representation of the node's interval """
@@ -150,7 +153,7 @@ class TreeNode():
             return prev_path
 
 
-class SegmentTree():
+class SegmentTree(object):
     def __init__(self, intervals):
         self.intervals = intervals
         self.root = None
@@ -186,7 +189,6 @@ class SegmentTree():
                 continue
             else:
                 unique_endpoints.append(ep)
-
 
         # append tuples for making intervals:
         # (left_endpoint, right_endpoint, l_closed, r_closed)
@@ -271,14 +273,20 @@ class SegmentTree():
         if node.right is not None:
             self.traverse(node.right, function)
 
+
+class nDimSegmentTree(SegmentTree):
+    def __init__(self, intervals):
+        super(nDimSegmentTree, self).__init__(intervals)  # compatible with python2
+
     def attach_one_tree(self, node, axis):
         """ attach a new segment tree to every TreeNode of the segment tree in axis=axis """
         # ToDo: too many dependencies between objects (Cube, Interval, TreeNode, ...)
-        node.axis = axis
         cannonical_subset = node.subset
-        cubes = [intv.cube for intv in cannonical_subset]
-        intervals = [c.sides[axis] for c in cubes]
-        node.next_axis_tree = SegmentTree(intervals)
+        intervals = []
+        for intv in cannonical_subset:
+            c = Cube.find_cube(intv)
+            intervals.append(c.sides[axis])
+        node.next_axis_tree = SegmentTree(intervals)  # ToDo: remove adding this attribute to node
         
     def get_attach_function(self, axis):
         """ attach_one_tree function for nodes in axis=axis """
@@ -320,7 +328,7 @@ if __name__ == '__main__':
 
     # build trees
     dim = 0
-    seg_tree_0 = SegmentTree([c.sides[dim] for c in rectangles])
+    seg_tree_0 = nDimSegmentTree([c.sides[dim] for c in rectangles])
     seg_tree_0.attach_all_trees(dim)
     
     print(rectangles)
@@ -336,6 +344,6 @@ if __name__ == '__main__':
         sub_seg_tree = node.next_axis_tree
         intervals1 = sub_seg_tree.query(y)
         for intv in intervals1:
-            c = intv.cube
+            c = Cube.find_cube(intv)
             selected_cubes.append(c)
     print('found cubes', selected_cubes)
