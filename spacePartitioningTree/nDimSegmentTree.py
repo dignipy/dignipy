@@ -25,7 +25,7 @@ import math
 import weakref
 
 
-class Interval():
+class Interval(object):
     def __init__(self, left_endpoint, right_endpoint, l_closed, r_closed):
         self.left_endpoint = left_endpoint  # float or int
         self.right_endpoint = right_endpoint  # float or int
@@ -65,7 +65,7 @@ class Interval():
         raise NotImplementedError('To do: implement intersection check')
 
 
-class Cube():
+class Cube(object):
     """ n-dimensional cube which is a product of intervals"""
     interval2cube = weakref.WeakValueDictionary() # Globally accessable with Cube class
 
@@ -85,7 +85,7 @@ class Cube():
         return cls.interval2cube[id(interval)]
     
 
-class TreeNode():
+class TreeNode(object):
     def __init__(self, left_endpoint, right_endpoint, l_closed, r_closed):
         self.left = None
         self.right = None
@@ -280,7 +280,6 @@ class nDimSegmentTree(SegmentTree):
 
     def attach_one_tree(self, node, axis):
         """ attach a new segment tree to every TreeNode of the segment tree in axis=axis """
-        # ToDo: too many dependencies between objects (Cube, Interval, TreeNode, ...)
         cannonical_subset = node.subset
         intervals = []
         for intv in cannonical_subset:
