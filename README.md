@@ -24,6 +24,8 @@ Various data structure implementations in Python.
 
 - Segment Tree
   - [Description](./descriptions/segmentTree.md), [Code](./spacePartitioningTree/segmentTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Segment_tree)
+- Multi Dimensional Segment Tree
+  - [Code](./spacePartitioningTree/nDimsegmentTree.py), [Book](https://books.google.co.kr/books?id=b1INPTC3w_QC&pg=PA17&lpg=PA17&dq=multi-level+segment+tree+implementation&source=bl&ots=dCilji4VfN&sig=wF6bBKAD5kRSDVrgADbhd_JtslU&hl=en&sa=X&ei=EVBeUbn2LYO70gHwoYDwBQ&redir_esc=y#v=onepage&q&f=false)
 
 ### Graphs
 

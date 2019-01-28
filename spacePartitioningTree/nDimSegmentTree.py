@@ -350,6 +350,7 @@ class nDimSegmentTree(object):
         next_trees = []
         for tree in trees:
             path = tree.root_to_leaf(point[axis]) # candidate nodes in axis=axis
+            # To Do: maybe collect subsets and just use the leaf node
             for node in path:
                 sub_seg_tree = self.find_attached_tree(node)
                 if sub_seg_tree is not None:
