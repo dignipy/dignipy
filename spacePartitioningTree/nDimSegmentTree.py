@@ -20,6 +20,7 @@ segmentTree.py is redundant.
 
 """
 
+import collections
 from functools import partial
 import math
 import weakref
@@ -67,22 +68,28 @@ class Interval(object):
 
 class Cube(object):
     """ n-dimensional cube which is a product of intervals"""
-    interval2cube = weakref.WeakValueDictionary() # Globally accessable with Cube class
+    interval2cube = weakref.WeakKeyDictionary() # Globally accessable with Cube class
 
-    def __init__(self, sides):
+    def __init__(self, *args):
+        if len(args) == 1:
+            # if supplied with only one argument, it is assumed to be iterable
+            sides = args[0]
+        else:
+            sides = args
+        # sides should be a list of Interval objects
         self.dimension = len(sides)
         self.sides = sides
         self.interval2axis = dict()
         for axis, interval in enumerate(sides):
-            self.interval2cube[id(interval)] = self
-            self.interval2axis[id(interval)] = axis
-    
+            self.interval2cube[interval] = self
+            self.interval2axis[interval] = axis
+
     def __repr__(self):
         return 'Cube'+repr(tuple(self.sides))
     
     @classmethod
     def find_cube(cls, interval):
-        return cls.interval2cube[id(interval)]
+        return cls.interval2cube[interval]
     
 
 class TreeNode(object):
@@ -158,6 +165,9 @@ class SegmentTree(object):
         self.intervals = intervals
         self.root = None
         self.build_tree()
+    
+    def __repr__(self):
+        return 'SegmentTree({})'.format(self.intervals)
 
     def query(self, point):
         """ return list of all Interval objects containing point """
@@ -264,41 +274,93 @@ class SegmentTree(object):
             self._append_subset(node.left, interval)
         if node.right is not None:
             self._append_subset(node.right, interval)
-    
-    def traverse(self, node, function):
-        """ traverse the subtree of the node and apply function(node)"""
-        function(node)
-        if node.left is not None:
-            self.traverse(node.left, function)
-        if node.right is not None:
-            self.traverse(node.right, function)
 
 
-class nDimSegmentTree(SegmentTree):
-    def __init__(self, intervals):
-        super(nDimSegmentTree, self).__init__(intervals)  # compatible with python2
+class nDimSegmentTree(object):
+    def __init__(self, cubes):
+        intervals = [c.sides[0] for c in cubes]
+        self.tree = SegmentTree(intervals)
+        self._node2attached_tree = dict()
+        self.dimension = cubes[0].dimension
+        same_dim = all([c.dimension == self.dimension for c in cubes])
+        if not same_dim:
+            raise IndexError('all cubes must have the same dimension')
+        self._queue = collections.defaultdict(list)
+        self.build_tree()
+        self._queue = None
+        
+    def __repr__(self):
+        return 'nDimSegmentTree({})'.format()
+
+    def find_attached_tree(self, node):
+        if node in self._node2attached_tree:
+            return self._node2attached_tree[node]
+        else:
+            return None
 
     def attach_one_tree(self, node, axis):
         """ attach a new segment tree to every TreeNode of the segment tree in axis=axis """
+        if axis + 1 >= self.dimension:
+            return None
         cannonical_subset = node.subset
         intervals = []
         for intv in cannonical_subset:
             c = Cube.find_cube(intv)
-            intervals.append(c.sides[axis])
-        node.next_axis_tree = SegmentTree(intervals)  # ToDo: remove adding this attribute to node
+            intervals.append(c.sides[axis+1])
+        if not intervals:
+            return None
+        sub_seg_tree = SegmentTree(intervals)
+        self._node2attached_tree[node] = sub_seg_tree
+        return sub_seg_tree
+
+    def attach_all_trees(self, node, axis):
+        """ attach segment trees to each nodes while traversing the subtree of the node"""
+        sub_seg_tree = self.attach_one_tree(node, axis)
+        if sub_seg_tree is not None:
+            self._queue[axis+1].append(sub_seg_tree)
+        if node.left is not None:
+            self.attach_all_trees(node.left, axis)
+        if node.right is not None:
+            self.attach_all_trees(node.right, axis)
+
+    def build_tree(self):
+        dim = 0
+        self.attach_all_trees(self.tree.root, dim)
+        while dim < self.dimension:
+            dim += 1
+            for tree in self._queue[dim]:
+                self.attach_all_trees(tree.root, dim)
+
+    def query(self, point):
+        if len(point) != self.dimension:
+            raise Exception('point must have the same dimension as the tree')
+        trees = [self.tree]
+        for axis in range(self.dimension-1):  # To Do: ensure dimension > 1 at the beggining
+            trees = self.get_next_trees(point, trees, axis)
         
-    def get_attach_function(self, axis):
-        """ attach_one_tree function for nodes in axis=axis """
-        return partial(self.attach_one_tree, axis=axis)
-    
-    def attach_all_trees(self, axis):
-        """ attach segment trees to each nodes """
-        self.traverse(self.root, self.get_attach_function(axis))
+        selected_cubes = []
+        for tree in trees:
+            last_intervals = tree.query(point[-1])
+            for intv in last_intervals:
+                c = Cube.find_cube(intv)
+                selected_cubes.append(c)
+        return selected_cubes
 
+    def get_next_trees(self, point, trees, axis):
+        next_trees = []
+        for tree in trees:
+            path = tree.root_to_leaf(point[axis]) # candidate nodes in axis=axis
+            for node in path:
+                sub_seg_tree = self.find_attached_tree(node)
+                if sub_seg_tree is not None:
+                    next_trees.append(sub_seg_tree)
+        return next_trees
+            
+        
 
-
-if __name__ == '__main__':
+def example():
     import random
+    print('1-dim example:')
     intervals = []
     for _ in range(10):
         endpoints = []
@@ -311,9 +373,11 @@ if __name__ == '__main__':
     print('intervals:', intervals)
     seg_tree = SegmentTree(intervals)
     print('intervals containing 34:', seg_tree.query(34))
+    print()
 
+    print('2-dim example:')
     rectangles = []
-    for _ in range(3):
+    for _ in range(5):
         rect = []
         for _ in range(2):
             endpoints = []
@@ -326,23 +390,39 @@ if __name__ == '__main__':
         rectangles.append(Cube(rect))
 
     # build trees
-    dim = 0
-    seg_tree_0 = nDimSegmentTree([c.sides[dim] for c in rectangles])
-    seg_tree_0.attach_all_trees(dim)
+    n_dim_seg_tree = nDimSegmentTree(rectangles)
     
-    print(rectangles)
+    print('input:', rectangles)
     print('querying (40, 50)...')
     x = 40
     y = 50
-    intervals0 = seg_tree_0.query(x)
-    print('intervals in axis=0 containing x=40', intervals0)
+    found = n_dim_seg_tree.query((x,y))
+    print('found rectangles', found)
+    print('{} rectangle(s) out of {}'.format(len(found), len(rectangles)))
+    print()
     
-    selected_cubes = []
-    path = seg_tree_0.root_to_leaf(x)
-    for node in path:
-        sub_seg_tree = node.next_axis_tree
-        intervals1 = sub_seg_tree.query(y)
-        for intv in intervals1:
-            c = Cube.find_cube(intv)
-            selected_cubes.append(c)
-    print('found cubes', selected_cubes)
+    print('5-dim example')
+    cubes = []
+    for _ in range(100):
+        rect = []
+        for _ in range(5):
+            endpoints = []
+            endpoints.append(random.choice(list(range(100))))
+            endpoints.append(random.choice(list(range(100))))
+            l_closed = random.choice([False, True])
+            r_closed = random.choice([False, True])
+            intv = Interval(min(endpoints), max(endpoints), l_closed, r_closed)
+            rect.append(intv)
+        cubes.append(Cube(rect))
+
+    # build trees
+    n_dim_seg_tree = nDimSegmentTree(cubes)
+    point = (52,52,52,52,52)
+    print('querying {}...'.format(point))
+    found = n_dim_seg_tree.query(point)
+    print('found cubes', found)
+    print('{} cube(s) out of {}'.format(len(found), len(cubes)))
+
+    
+if __name__ == '__main__':
+    example()
