@@ -20,6 +20,8 @@ segmentTree.py is redundant.
 
 """
 
+# To Do: how to implement dynamic update?
+
 import collections
 from functools import partial
 import math
@@ -175,8 +177,8 @@ class SegmentTree(object):
             raise Exception('tree must be built first')
         return self.root.query(point)
     
-    def root_to_leaf(self, point):
-        return self.root.path_to_leaf(point)
+    def root_to_leaf(self, query_point):
+        return self.root.path_to_leaf(query_point)
 
     def build_tree(self):
         """ Build segment tree from given intervals and return the root.
@@ -284,10 +286,8 @@ class nDimSegmentTree(object):
         self.dimension = cubes[0].dimension
         same_dim = all([c.dimension == self.dimension for c in cubes])
         if not same_dim:
-            raise IndexError('all cubes must have the same dimension')
-        self._queue = collections.defaultdict(list)
+            raise Exception('all cubes must have the same dimension')
         self.build_tree()
-        self._queue = None
         
     def __repr__(self):
         return 'nDimSegmentTree({})'.format()
@@ -324,12 +324,14 @@ class nDimSegmentTree(object):
             self.attach_all_trees(node.right, axis)
 
     def build_tree(self):
+        self._queue = collections.defaultdict(list) # temporary queue for each dimension
         dim = 0
         self.attach_all_trees(self.tree.root, dim)
         while dim < self.dimension:
             dim += 1
             for tree in self._queue[dim]:
                 self.attach_all_trees(tree.root, dim)
+        del self._queue
 
     def query(self, point):
         if len(point) != self.dimension:
@@ -350,7 +352,6 @@ class nDimSegmentTree(object):
         next_trees = []
         for tree in trees:
             path = tree.root_to_leaf(point[axis]) # candidate nodes in axis=axis
-            # To Do: maybe collect subsets and just use the leaf node
             for node in path:
                 sub_seg_tree = self.find_attached_tree(node)
                 if sub_seg_tree is not None:
