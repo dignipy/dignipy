@@ -4,6 +4,8 @@ This module implements the rope data structure as described in:
     https://en.wikipedia.org/wiki/Rope_(data_structure)
 """
 
+import math
+
 class Node():
     def __init__(self, value=None):
         self.value = value
@@ -17,8 +19,10 @@ class Node():
 
 
 class Rope():
-    def __init__(self):
+    def __init__(self, strings=None):
         self.root = None
+        if strings is not None:
+            self.build(strings)
 
     def _get_weight(self, node):
         """
@@ -28,11 +32,6 @@ class Rope():
             return node.length_sum
         else:
             return node.left.length_sum
-
-    def _index(self, node, idx):
-        """ returns the value at index idx from the subtree of node """
-        found_node, node_idx = self._find_index_node(node, idx)
-        return found_node[node_idx]
 
     def _find_index_node(self, node, idx):
         """ returns the node which contains the index idx from the subtree of node"""
@@ -51,6 +50,7 @@ class Rope():
 
     @classmethod
     def _concat_nodes(cls, left_node, right_node):
+        """ concatenate two nodes and return a new root node"""
         root = Node()
         root.left = left_node
         root.right = right_node
@@ -99,65 +99,98 @@ class Rope():
             words.extend(right_words)
             return words
 
-    def text(self, end_idx=None):
+    def _substring(self, node, start_idx, end_idx):
+        """ gather strings from leaf nodes by index and return as a list """
+        if end_idx < 0:
+            return []
+        weight = self._get_weight(node)
+        if node.left is None and node.right is None:
+            if start_idx < 0:
+                start_idx = 0
+            if start_idx == 0 and end_idx == node.length_sum:
+                return [node.value]
+            else:
+                leaf_string = node.value[start_idx:end_idx]
+                if leaf_string:
+                    return [leaf_string]
+                else:
+                    return []
+        elif start_idx > node.length_sum - 1:
+            return []
+        else:
+            words = self._substring(node.left, start_idx, end_idx)
+            right_words = self._substring(node.right, start_idx-weight, end_idx-weight)
+            words.extend(right_words)
+            return words
+
+    def substring(self, start_idx=None, end_idx=None):
+        """ substring of the original string, [start_idx: end_idx]"""
+        if start_idx is None:
+            start_idx = 0
         if end_idx is None:
             end_idx = self.root.length_sum
-        return ''.join(self._traverse_with_condition(self.root, end_idx, end_idx))
+        return ''.join(self._substring(self.root, start_idx, end_idx))
 
-    def _substring(self, node, start, length):
-        raise NotImplementedError('substring not finished yet')
-        if node.left is None and node.right is None:
-            if start == 0 and node.length_sum == length:
-                return node
-            else:
-                return Node(node.value[start:start+length])
-                
-        if start <= 0 and length >= length(node.left):
-            left = node.left
-        else:
-            left = self._substring(node.left, start, length)
-        if (start <= node.left.length_sum) and (start + length >= node.left.length_sum + node.right.length_sum):
-            right = ndoe.right
-        else:
-            right = self._substring(node.right, start-node.left.length_sum, length-left.length_sum)
-        return self._concat_nodes(left, right)
-
-    def substring(self, start, length):
-        raise NotImplementedError('substring not finished yet')
-        new_root = self._substring(self.root, start, length)
-        new_rope = self.__class__()
-        new_rope.root = new_root
+    def sub_rope(self, start_idx, end_idx):
+        """ make a new Rope with the substring """
+        leaf_strings = self._substring(self.root, start_idx, end_idx)
+        new_rope = self.__class__(leaf_strings)
         return new_rope
 
+    def build(self, elements):
+        """ build the tree from a list of strings """
+        num_leaves = len(elements)
+
+        max_depth = int(math.log(num_leaves) / math.log(2)) + 1
+        num_last_leaves = 2 * (num_leaves - 2**(max_depth - 1))
+
+        # build tree from bottom to up
+
+        # make a queue for each depth
+        q = []
+        for i, elem in enumerate(elements):
+            if i < num_last_leaves:
+                if i % 2 == 0:
+                    prev = elem
+                else:
+                    left_node = Node(prev)
+                    right_node = Node(elem)
+                    node = self._concat_nodes(left_node, right_node)
+                    q.append(node)
+            else:
+                node = Node(elem)
+                q.append(node)
+
+        # while depth > 0
+        while len(q) > 1:
+            tmp_q = []
+            for i, node in enumerate(q):
+                if i % 2 == 0:
+                    prev = node
+                else:
+                    new_node = self._concat_nodes(prev, node)
+                    tmp_q.append(new_node)
+            q = tmp_q
+
+        self.root = q[0]
+
+
 def example():
-    n1 = Node('hel')
-    n2 = Node('lo world')
-    root = Rope._concat_nodes(n1, n2)
-    rope1 = Rope()
-    rope1.root = root
+    rope1 = Rope(['hel', 'lo world'])
+    print(rope1.substring(0,7))
 
-    print(rope1.text(7))
-
-    n1 = Node(' my nam')
-    n2 = Node('e is')
-    root = Rope._concat_nodes(n1, n2)
-    rope2 = Rope()
-    rope2.root = root
-
-    print(rope2.text(7))
+    rope2 = Rope([' my nam', 'e is'])
+    print(rope2.substring(0,7))
 
     rope3 = Rope.concat(rope1, rope2)
-    print(rope3.text(100))
+    print(rope3.substring())
 
-    n = Node(' minwoo')
-    rope4 = Rope()
-    rope4.root = n
-
+    rope4 = Rope([' minwoo'])
     rope3.append(rope4)
-    print(rope3.text())
-    print(rope3.text(19))
+    print(rope3.substring())
 
-    #print(rope3.substring(15, 4).text(), '???')
-    
+    sub_rope = rope3.sub_rope(1,14)
+    print(sub_rope.substring())
+
 if __name__ == "__main__":
     example()
