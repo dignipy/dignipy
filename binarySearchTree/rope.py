@@ -5,6 +5,8 @@ This module implements the rope data structure as described in:
 """
 
 import math
+import heapq
+import bisect
 
 class Node():
     def __init__(self, value=None):
@@ -16,6 +18,24 @@ class Node():
             self.length_sum = len(value)
         else:
             self.length_sum = 0
+
+
+class Fibonacci():
+    def __init__(self):
+        self.sequence = [1, 2]
+
+    def get(self, idx):
+        """ get the (idx + 1)-th Fibonacci number"""
+        if idx < len(self.sequence):
+            return self.sequence[idx]
+        new_fib = self.get(idx-1) + self.get(idx-2)
+        if idx == len(self.sequence):
+            self.sequence.append(new_fib)
+        return new_fib
+
+    def find_index(self, number):
+        """ returns index idx such that fib(idx) <= number < fib(idx+1) """
+        return bisect.bisect(self.sequence, number) - 1
 
 
 class Rope():
@@ -85,19 +105,6 @@ class Rope():
         left_node = Node(node.value[:idx])
         right_node = Node(node.value[idx:])        
         return self._concat_nodes(left_node, right_node)
-
-    def _traverse_with_condition(self, node, relative_idx, idx):
-        """ gather strings from leaf nodes upto relative_idx """
-        if relative_idx < 0:
-            return []
-        weight = self._get_weight(node)
-        if node.left is None and node.right is None:
-            return [node.value[:relative_idx]]
-        else:
-            words = self._traverse_with_condition(node.left, relative_idx, idx)
-            right_words = self._traverse_with_condition(node.right, relative_idx-weight, idx)
-            words.extend(right_words)
-            return words
 
     def _substring(self, node, start_idx, end_idx):
         """ gather strings from leaf nodes by index and return as a list """
@@ -174,6 +181,14 @@ class Rope():
 
         self.root = q[0]
 
+    def rebalance(self):
+        raise NotImplementedError('rebalance method not implemented yet')
+        fib = Fibonacci()
+        h = [] # heap
+        for node in traversal:
+            if not h or h[0] > len(node.value):
+                pass
+        
 
 def example():
     rope1 = Rope(['hel', 'lo world'])
@@ -189,8 +204,9 @@ def example():
     rope3.append(rope4)
     print(rope3.substring())
 
-    sub_rope = rope3.sub_rope(1,14)
+    sub_rope = rope3.sub_rope(1, 14)
     print(sub_rope.substring())
+
 
 if __name__ == "__main__":
     example()
