@@ -35,7 +35,12 @@ class Fibonacci():
 
     def find_index(self, number):
         """ returns index idx such that fib(idx) <= number < fib(idx+1) """
-        return bisect.bisect(self.sequence, number) - 1
+        if number < self.sequence[-1]:
+            return bisect.bisect(self.sequence, number) - 1
+        else:
+            while number >= self.sequence[-1]:
+                self.get(len(self.sequence))
+            return len(self.sequence) - 2
 
 
 class Rope():
@@ -207,6 +212,11 @@ def example():
     sub_rope = rope3.sub_rope(1, 14)
     print(sub_rope.substring())
 
+    fib = Fibonacci()
+    print(fib.get(4))
+    print(fib.sequence)
+    print(fib.find_index(88))
+    print(fib.sequence)
 
 if __name__ == "__main__":
     example()
