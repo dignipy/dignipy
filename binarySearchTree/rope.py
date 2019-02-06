@@ -50,7 +50,8 @@ class Rope():
     def __init__(self, leaves=None):
         self.root = None
         if leaves is not None:
-            self.build(leaves)
+            #self.build(leaves=leaves)
+            self.rebalance(leaves=leaves)
 
     def _get_weight(self, node):
         """
@@ -150,7 +151,7 @@ class Rope():
                 return [node]
             else:
                 leaf_string = node.value[start_idx:end_idx]
-                leaf_node = Node(leaf_string)
+                leaf_node = Node(leaf_string) # make new node
                 if leaf_string:
                     return [leaf_node]
                 else:
@@ -175,11 +176,13 @@ class Rope():
     def sub_rope(self, start_idx, end_idx):
         """ make a new Rope with the substring """
         leaves = self._sub_leaves(self.root, start_idx, end_idx)
-        new_rope = self.__class__(leaves)
+        new_rope = self.__class__(leaves=leaves)
         return new_rope
 
-    def build(self, leaves):
-        """ build the tree from a list of nodes """
+    def build(self, leaves=None):
+        """ build a balanced tree from a list of nodes """
+        if leaves is None:
+            leaves = [n for n in self._traverse(self.root)]
         num_leaves = len(leaves)
 
         max_depth = int(math.log(num_leaves) / math.log(2)) + 1
@@ -212,6 +215,7 @@ class Rope():
                     tmp_q.append(new_node)
             q = tmp_q
         self.root = q[0]
+        return self.root
 
     @classmethod
     def _traverse(cls, node):
@@ -227,10 +231,19 @@ class Rope():
         else:
             pass
 
-    def rebalance(self):
+    def rebalance(self, leaves=None):
+        """
+        rebalance the tree from a list of nodes as described in:
+        Ropes: an Alternative to Strings, hans-j. boehm, russ atkinson and michael plass, 1995
+        """
         fib = Fibonacci()
         h = [] # heap
         pos2node = dict()
+
+        if leaves is None:
+            nodes = self._traverse(self.root) # generator
+        else:
+            nodes = leaves
 
         def fibo_add(node):
             if not h or h[0] > node.length_sum:
@@ -244,13 +257,13 @@ class Rope():
                 del pos2node[pos]
                 fibo_add(concat_node)
 
-        for node in self._traverse(self.root):
+        for node in nodes:
             fibo_add(node)
 
         right_pos = heapq.heappop(h)
         right_node = pos2node[right_pos]
         del pos2node[right_pos]
-        while len(h) > 1:
+        while len(h) >= 1:
             left_pos = heapq.heappop(h)
             left_node = pos2node[left_pos]
             right_node = self._concat_nodes(left_node, right_node)
@@ -282,8 +295,6 @@ def example():
     print()
     sub_rope = rope3.sub_rope(1, 14)
     print(sub_rope.substring())
-    for leaf in sub_rope._traverse(sub_rope.root):
-        print(leaf)
 
 if __name__ == "__main__":
     example()
