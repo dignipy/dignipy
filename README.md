@@ -19,6 +19,8 @@ Various data structure implementations in Python.
   - [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree)
 - Red-black Tree
   - [Description](./descriptions/RedBlackTree.md), [Code](./binarySearchTree/redBlackTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
+- Rope
+  - [Code](./binarySearchTree/rope.py), [Wikipedia](https://en.wikipedia.org/wiki/Rope_%28data_structure%29), [Paper](https://www.cs.rit.edu/usr/local/pub/jeh/courses/QUARTERS/FP/Labs/CedarRope/rope-paper.pdf)
 
 ### Space-partitioning Trees
 
