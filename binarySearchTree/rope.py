@@ -170,13 +170,42 @@ class Rope():
             start_idx = 0
         if end_idx is None:
             end_idx = self.root.length_sum
+        elif start_idx < 0:
+            raise IndexError(start_idx)
+        elif end_idx > self.root.length_sum:
+            raise IndexError(end_idx)
         leaves = self._sub_leaves(self.root, start_idx, end_idx)
         return ''.join([node.value for node in leaves])
 
     def sub_rope(self, start_idx, end_idx):
         """ make a new Rope with the substring """
+        if start_idx < 0:
+            raise IndexError(start_idx)
+        elif end_idx > self.root.length_sum:
+            raise IndexError(end_idx)
         leaves = self._sub_leaves(self.root, start_idx, end_idx)
         new_rope = self.__class__(leaves=leaves)
+        return new_rope
+    
+    def split(self, idx):
+        """ split the rope into two ropes """
+        left_rope = self.sub_rope(0, idx)
+        right_rope = self.sub_rope(idx, self.root.length_sum)
+        return left_rope, right_rope
+    
+    def insert(self, idx, string):
+        """ insert string at position idx """
+        left_leaves = self._sub_leaves(self.root, 0, idx)
+        middle_leaf = Node(string)
+        right_leaves = self._sub_leaves(self.root, idx, self.root.length_sum)
+        new_rope = self.__class__(leaves= left_leaves+[middle_leaf]+right_leaves)
+        self.root = new_rope.root
+    
+    def delete(self, i, j):
+        """ delete [i:j] entries of rope """
+        left_leaves = self._sub_leaves(self.root, 0, i)
+        right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
+        new_rope = self.__class__(leaves= left_leaves+right_leaves)
         return new_rope
 
     def build(self, leaves=None):
@@ -295,6 +324,13 @@ def example():
     print()
     sub_rope = rope3.sub_rope(1, 14)
     print(sub_rope.substring())
+    
+    sub_rope2 = rope3.delete(1,14)
+    print(sub_rope2.substring())
+    
+    sub_rope2.insert(1, 'ello world my')
+    print(sub_rope2.substring())
+    
 
 if __name__ == "__main__":
     example()
