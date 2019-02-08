@@ -4,9 +4,11 @@ This module implements the rope data structure as described in:
     https://en.wikipedia.org/wiki/Rope_(data_structure)
 """
 
-import math
-import heapq
 import bisect
+import collections
+import heapq
+import math
+
 
 class Node():
     def __init__(self, value=None):
@@ -46,12 +48,99 @@ class Fibonacci():
             return len(self.sequence) - 2
 
 
-class Rope():
+class Rope(collections.abc.MutableSequence):
     def __init__(self, leaves=None):
         self.root = None
         if leaves is not None:
             #self.build(leaves=leaves)
             self.rebalance(leaves=leaves)
+
+    def __str__(self):
+        return "Rope({})".format(repr(self))
+
+    def __repr__(self):
+        """ treat like strings """
+        return self.substring()
+
+    def __getitem__(self, idx):
+        if isinstance(idx, int):
+            # process index as an integer
+            length = len(self)
+            if -length <= idx < 0:
+                idx += length
+                return self.index(idx)
+            elif 0 <= idx < length:
+                return self.index(idx)
+            else:
+                raise IndexError("index out of range")
+        elif isinstance(idx, slice):
+            start, stop, step = idx.indices(len(self))    # idx is a slice
+            if step == 1:
+                return self.substring(start, stop)
+            else:
+                gather = []
+                for i in range(start, stop, step):
+                    gather.append(self.index(i))
+                return ''.join(gather)
+        else:
+            raise TypeError("index must be int or slice")
+    
+    def __len__(self):
+        return self.root.length_sum
+
+    def __setitem__(self, idx, val):
+        rope_length = len(self)
+        if isinstance(idx, int):
+            # process index as an integer
+            if -rope_length <= idx < 0:
+                idx += rope_length
+            elif 0 <= idx < rope_length:
+                pass
+            else:
+                raise IndexError("index out of range")
+            start = idx
+            stop = idx + 1
+            step = 1
+        elif isinstance(idx, slice):
+            start, stop, step = idx.indices(rope_length)  # idx is a slice
+        else:
+            raise TypeError("index must be int or slice")
+        if step == 1:
+            self.replace(start, stop, val)
+        else:
+            indices_length = len(range(start, stop, step))
+            if indices_length != len(val):
+                error_message = "attempt to assign sequence of size {}".format(len(val))
+                error_message += " to extended slice of size {}".format(indices_length)
+                raise ValueError(error_message)
+            # To Do: takes too much time rebalancing
+            for i, v in zip(range(start, stop, step), val):
+                self.__setitem__(i, v)
+
+    def __delitem__(self, idx):
+        rope_length = len(self)
+        if isinstance(idx, int):
+            # process index as an integer
+            if -rope_length <= idx < 0:
+                idx += rope_length
+            elif 0 <= idx < rope_length:
+                pass
+            else:
+                raise IndexError("index out of range")
+            start = idx
+            stop = idx + 1
+            step = 1
+        elif isinstance(idx, slice):
+            start, stop, step = idx.indices(rope_length)  # idx is a slice
+        else:
+            raise TypeError("index must be int or slice")
+        if step == 1:
+            self.delete(start, stop)
+        else:
+            # To Do: takes too much time rebalancing
+            for i in range(start, stop, step):
+                self.delete(i, i+1)
+
 
     def _get_weight(self, node):
         """
@@ -74,8 +163,10 @@ class Rope():
 
     def index(self, idx):
         """ returns the value at index idx """
+        if idx < 0 or idx >= self.root.length_sum:
+            raise IndexError(idx)
         found_node, node_idx = self._find_index_node(self.root, idx)
-        return found_node[node_idx]
+        return found_node.value[node_idx]
 
     @classmethod
     def _concat_nodes(cls, left_node, right_node):
@@ -195,18 +286,22 @@ class Rope():
     
     def insert(self, idx, string):
         """ insert string at position idx """
-        left_leaves = self._sub_leaves(self.root, 0, idx)
-        middle_leaf = Node(string)
-        right_leaves = self._sub_leaves(self.root, idx, self.root.length_sum)
-        new_rope = self.__class__(leaves= left_leaves+[middle_leaf]+right_leaves)
-        self.root = new_rope.root
-    
+        self.replace(idx, idx, string)
+
     def delete(self, i, j):
         """ delete [i:j] entries of rope """
         left_leaves = self._sub_leaves(self.root, 0, i)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
         new_rope = self.__class__(leaves= left_leaves+right_leaves)
-        return new_rope
+        self.root = new_rope.root
+
+    def replace(self, i, j, string):
+        """ replace [i:j] to string """
+        left_leaves = self._sub_leaves(self.root, 0, i)
+        middle_leaf = Node(string)
+        right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
+        new_rope = self.__class__(leaves= left_leaves+[middle_leaf]+right_leaves)
+        self.root = new_rope.root
 
     def build(self, leaves=None):
         """ build a balanced tree from a list of nodes """
@@ -303,34 +398,36 @@ class Rope():
 
 def example():
     rope1 = Rope([Node('hel'), Node('lo world')])
-    print(rope1.substring(0,7))
+    print(rope1[0:7])
 
     rope2 = Rope([Node(' my nam'), Node('e is')])
-    print(rope2.substring(0,7))
+    print(rope2[0:7])
 
     rope3 = Rope.concat(rope1, rope2)
-    print(rope3.substring())
+    print(rope3)
 
     rope4 = Rope([Node(' minwoo')])
     rope3.append(rope4)
-    print(rope3.substring())
-    r = rope3._sub_leaves(rope3.root, 1,9)
-    print([n.value for n in r])
-
+    print()
+    print(rope3)
     rope3.rebalance()
 
     for leaf in rope3._traverse(rope3.root):
         print(leaf)
     print()
     sub_rope = rope3.sub_rope(1, 14)
-    print(sub_rope.substring())
-    
-    sub_rope2 = rope3.delete(1,14)
-    print(sub_rope2.substring())
-    
-    sub_rope2.insert(1, 'ello world my')
-    print(sub_rope2.substring())
-    
+    substring = rope3[1:14]
+    print(sub_rope, 'and', substring)
+    print('equal?', sub_rope == substring)
+
+    del rope3[1:14]  # __delitem__
+    print(rope3)
+
+    rope3[1:1] = repr(sub_rope)  # insert
+    print(rope3)
+
+    rope3[::-1] = 'HELLO WORLD MY NAME IS OOMNIW'  # __setitem__
+    print(rope3)
 
 if __name__ == "__main__":
     example()
