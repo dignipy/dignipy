@@ -49,10 +49,12 @@ class Fibonacci():
 
 
 class Rope(collections.abc.MutableSequence):
-    def __init__(self, leaves=None):
+    def __init__(self, strings=None):
         self.root = None
-        if leaves is not None:
-            #self.build(leaves=leaves)
+        if strings is not None:
+            if isinstance(strings, str):
+                strings = [strings]
+            leaves = [Node(value) for value in strings]
             self.rebalance(leaves=leaves)
 
     def __str__(self):
@@ -74,7 +76,7 @@ class Rope(collections.abc.MutableSequence):
             else:
                 raise IndexError("index out of range")
         elif isinstance(idx, slice):
-            start, stop, step = idx.indices(len(self))    # idx is a slice
+            start, stop, step = idx.indices(len(self))  # idx is a slice
             if step == 1:
                 return self.substring(start, stop)
             else:
@@ -84,7 +86,7 @@ class Rope(collections.abc.MutableSequence):
                 return ''.join(gather)
         else:
             raise TypeError("index must be int or slice")
-    
+
     def __len__(self):
         return self.root.length_sum
 
@@ -140,7 +142,6 @@ class Rope(collections.abc.MutableSequence):
             # To Do: takes too much time rebalancing
             for i in range(start, stop, step):
                 self.delete(i, i+1)
-
 
     def _get_weight(self, node):
         """
@@ -275,7 +276,9 @@ class Rope(collections.abc.MutableSequence):
         elif end_idx > self.root.length_sum:
             raise IndexError(end_idx)
         leaves = self._sub_leaves(self.root, start_idx, end_idx)
-        new_rope = self.__class__(leaves=leaves)
+        new_rope = self.__class__()
+        new_root = self._rebalance(leaves=leaves)
+        new_rope.root = new_root
         return new_rope
     
     def split(self, idx):
@@ -292,16 +295,14 @@ class Rope(collections.abc.MutableSequence):
         """ delete [i:j] entries of rope """
         left_leaves = self._sub_leaves(self.root, 0, i)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
-        new_rope = self.__class__(leaves= left_leaves+right_leaves)
-        self.root = new_rope.root
+        self.rebalance(leaves= left_leaves+right_leaves)
 
     def replace(self, i, j, string):
         """ replace [i:j] to string """
         left_leaves = self._sub_leaves(self.root, 0, i)
         middle_leaf = Node(string)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
-        new_rope = self.__class__(leaves= left_leaves+[middle_leaf]+right_leaves)
-        self.root = new_rope.root
+        self.rebalance(leaves= left_leaves+[middle_leaf]+right_leaves)
 
     def build(self, leaves=None):
         """ build a balanced tree from a list of nodes """
@@ -355,10 +356,11 @@ class Rope(collections.abc.MutableSequence):
         else:
             pass
 
-    def rebalance(self, leaves=None):
+    def _rebalance(self, leaves=None):
         """
         rebalance the tree from a list of nodes as described in:
         Ropes: an Alternative to Strings, hans-j. boehm, russ atkinson and michael plass, 1995
+        and return the new root node
         """
         fib = Fibonacci()
         h = [] # heap
@@ -392,21 +394,24 @@ class Rope(collections.abc.MutableSequence):
             left_node = pos2node[left_pos]
             right_node = self._concat_nodes(left_node, right_node)
             del pos2node[left_pos]
-        self.root = right_node
-        return self.root
+        return right_node
 
+    def rebalance(self, leaves=None):
+        """ rebalance the rope with the given leaf nodes"""
+        root = self._rebalance(leaves=leaves)
+        self.root = root
 
 def example():
-    rope1 = Rope([Node('hel'), Node('lo world')])
+    rope1 = Rope(['hel', 'lo world'])
     print(rope1[0:7])
 
-    rope2 = Rope([Node(' my nam'), Node('e is')])
+    rope2 = Rope([' my nam', 'e is'])
     print(rope2[0:7])
 
     rope3 = Rope.concat(rope1, rope2)
     print(rope3)
 
-    rope4 = Rope([Node(' minwoo')])
+    rope4 = Rope(' minwoo')
     rope3.append(rope4)
     print()
     print(rope3)
@@ -417,7 +422,7 @@ def example():
     print()
     sub_rope = rope3.sub_rope(1, 14)
     substring = rope3[1:14]
-    print(sub_rope, 'and', substring)
+    print(sub_rope, '==', substring)
     print('equal?', sub_rope == substring)
 
     del rope3[1:14]  # __delitem__
