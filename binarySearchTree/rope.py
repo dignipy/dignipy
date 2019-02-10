@@ -4,6 +4,10 @@ This module implements the rope data structure as described in:
     https://en.wikipedia.org/wiki/Rope_(data_structure)
 """
 
+# To Do: make delete / replace without rebalancing
+# To Do: implement some 
+# To Do: make consistent the methods that return the new rope
+
 import bisect
 import collections
 import heapq
@@ -270,7 +274,7 @@ class Rope(collections.abc.MutableSequence):
         return ''.join([node.value for node in leaves])
 
     def sub_rope(self, start_idx, end_idx):
-        """ make a new Rope with the substring """
+        """ make and return a new Rope with the substring """
         if start_idx < 0:
             raise IndexError(start_idx)
         elif end_idx > self.root.length_sum:
@@ -282,30 +286,30 @@ class Rope(collections.abc.MutableSequence):
         return new_rope
     
     def split(self, idx):
-        """ split the rope into two ropes """
+        """ split the rope into two new ropes """
         left_rope = self.sub_rope(0, idx)
         right_rope = self.sub_rope(idx, self.root.length_sum)
         return left_rope, right_rope
     
     def insert(self, idx, string):
-        """ insert string at position idx """
+        """ insert string at position idx, returns None """
         self.replace(idx, idx, string)
 
     def delete(self, i, j):
-        """ delete [i:j] entries of rope """
+        """ delete [i:j] entries of rope, returns None """
         left_leaves = self._sub_leaves(self.root, 0, i)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
         self.rebalance(leaves= left_leaves+right_leaves)
 
     def replace(self, i, j, string):
-        """ replace [i:j] to string """
+        """ replace [i:j] to string, returns None """
         left_leaves = self._sub_leaves(self.root, 0, i)
         middle_leaf = Node(string)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
         self.rebalance(leaves= left_leaves+[middle_leaf]+right_leaves)
 
     def build(self, leaves=None):
-        """ build a balanced tree from a list of nodes """
+        """ build a balanced tree from a list of nodes and replace the original root """
         if leaves is None:
             leaves = [n for n in self._traverse(self.root)]
         num_leaves = len(leaves)
@@ -397,7 +401,7 @@ class Rope(collections.abc.MutableSequence):
         return right_node
 
     def rebalance(self, leaves=None):
-        """ rebalance the rope with the given leaf nodes"""
+        """ rebalance the rope with the given leaf nodes and replace the root """
         root = self._rebalance(leaves=leaves)
         self.root = root
 
@@ -433,6 +437,7 @@ def example():
 
     rope3[::-1] = 'HELLO WORLD MY NAME IS OOMNIW'  # __setitem__
     print(rope3)
+    
 
 if __name__ == "__main__":
     example()
