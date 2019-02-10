@@ -5,7 +5,7 @@ This module implements the rope data structure as described in:
 """
 
 # To Do: make delete / replace without rebalancing
-# To Do: implement some 
+# To Do: implement "short" leaf nodes to append short strings to node.value : _concat_ndoes_short
 # To Do: make consistent the methods that return the new rope
 
 import bisect
@@ -176,6 +176,22 @@ class Rope(collections.abc.MutableSequence):
     @classmethod
     def _concat_nodes(cls, left_node, right_node):
         """ concatenate two nodes and return a new root node"""
+        root = Node()
+        root.left = left_node
+        root.right = right_node
+        root.length_sum = left_node.length_sum + right_node.length_sum
+        return root
+
+    @classmethod
+    def _concat_nodes_short(cls, left_node, right_node):
+        """
+        concatenate two nodes and return a new root node
+        as in the paper, concatenate the strings if:
+        a) both nodes are short leaves
+        or
+        b) the right most son of left_node and the right_node are short leaves
+        """
+        raise NotImplementedError('short leaf not implemented')
         root = Node()
         root.left = left_node
         root.right = right_node
@@ -437,6 +453,27 @@ def example():
 
     rope3[::-1] = 'HELLO WORLD MY NAME IS OOMNIW'  # __setitem__
     print(rope3)
+    
+    
+    import time
+    start1 = time.time()
+    a = 'a'*10000
+    b = str(a)
+    for _ in range(100):
+        b = b[:int(len(b)/2)] + a + b[int(len(b)/2):]
+    end1 = time.time()
+    print("string append time:", end1 - start1)
+    start2 = time.time()
+    b = Rope([a])
+    print(len(b))
+    for i in range(496):
+        b.insert(int(len(b)/2), Rope([a]))
+    print('no problem')
+    end2 = time.time()
+    print('found a bug')
+    b.insert(int(len(b)/2), Rope([a]))
+
+    print("rope append time:", end2 - start2)
     
 
 if __name__ == "__main__":
