@@ -11,16 +11,16 @@ Various data structure implementations in Python.
 - Fenwick Tree
   - [Description](./descriptions/FenwickTree.md), [Code](./multiwayTree/fenwickTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Fenwick_tree)
 
-### Binary Search Trees
+### Binary Trees
 
 - Vanilla Binary Search Tree
-  - [Code](./binarySearchTree/BST.py), [Wikipedia](https://en.wikipedia.org/wiki/Binary_search_tree)
+  - [Code](./binaryTree/BST.py), [Wikipedia](https://en.wikipedia.org/wiki/Binary_search_tree)
 - AVL Tree
   - [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree)
 - Red-black Tree
-  - [Description](./descriptions/RedBlackTree.md), [Code](./binarySearchTree/redBlackTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
+  - [Description](./descriptions/RedBlackTree.md), [Code](./binaryTree/redBlackTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
 - Rope
-  - [Code](./binarySearchTree/rope.py), [Wikipedia](https://en.wikipedia.org/wiki/Rope_%28data_structure%29), [Paper](https://www.cs.rit.edu/usr/local/pub/jeh/courses/QUARTERS/FP/Labs/CedarRope/rope-paper.pdf)
+  - [Code](./binaryTree/rope.py), [Wikipedia](https://en.wikipedia.org/wiki/Rope_%28data_structure%29), [Paper](https://www.cs.rit.edu/usr/local/pub/jeh/courses/QUARTERS/FP/Labs/CedarRope/rope-paper.pdf)
 
 ### Space-partitioning Trees
 
