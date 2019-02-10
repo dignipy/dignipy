@@ -11,6 +11,7 @@ This module implements the rope data structure as described in:
 import bisect
 import collections
 import heapq
+import itertools
 import math
 
 
@@ -276,6 +277,32 @@ class Rope(collections.abc.MutableSequence):
             leaves.extend(right_leaves)
             return leaves
 
+    def _sub_leaves_generator(self, node, start_idx, end_idx):
+        """ gather leaf nodes by index and yield """
+        if end_idx < 0:
+            pass
+        else:
+            weight = self._get_weight(node)
+            if node.left is None and node.right is None:
+                if start_idx < 0:
+                    start_idx = 0
+                if start_idx == 0 and end_idx == node.length_sum:
+                    yield node
+                else:
+                    leaf_string = node.value[start_idx:end_idx]
+                    leaf_node = Node(leaf_string) # make new node
+                    if leaf_string:
+                        yield leaf_node
+                    else:
+                        pass
+            elif start_idx > node.length_sum - 1:
+                pass
+            else:
+                for leaf in self._sub_leaves_generator(node.left, start_idx, end_idx):
+                    yield leaf
+                for leaf in self._sub_leaves_generator(node.right, start_idx-weight, end_idx-weight):
+                    yield leaf
+
     def substring(self, start_idx=None, end_idx=None):
         """ substring of the original string, [start_idx: end_idx]"""
         if start_idx is None:
@@ -315,14 +342,16 @@ class Rope(collections.abc.MutableSequence):
         """ delete [i:j] entries of rope, returns None """
         left_leaves = self._sub_leaves(self.root, 0, i)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
-        self.rebalance(leaves= left_leaves+right_leaves)
+        leaves = itertools.chain(left_leaves, right_leaves)
+        self.rebalance(leaves=leaves)
 
     def replace(self, i, j, string):
         """ replace [i:j] to string, returns None """
         left_leaves = self._sub_leaves(self.root, 0, i)
         middle_leaf = Node(string)
         right_leaves = self._sub_leaves(self.root, j, self.root.length_sum)
-        self.rebalance(leaves= left_leaves+[middle_leaf]+right_leaves)
+        leaves = itertools.chain(left_leaves, [middle_leaf], right_leaves)
+        self.rebalance(leaves=leaves)
 
     def build(self, leaves=None):
         """ build a balanced tree from a list of nodes and replace the original root """
@@ -392,8 +421,8 @@ class Rope(collections.abc.MutableSequence):
             nodes = leaves
 
         def fibo_add(node):
-            if not h or h[0] > node.length_sum:
-                pos = fib.find_index(node.length_sum)
+            pos = fib.find_index(node.length_sum)
+            if not h or h[0] > pos:
                 heapq.heappush(h, pos)
                 pos2node[pos] = node
             else:
@@ -457,23 +486,18 @@ def example():
     
     import time
     start1 = time.time()
-    a = 'a'*10000
+    a = 'a'*1000000  # performance depends on chunk size
     b = str(a)
     for _ in range(100):
         b = b[:int(len(b)/2)] + a + b[int(len(b)/2):]
     end1 = time.time()
-    print("string append time:", end1 - start1)
+    print("string insert time:", end1 - start1)
     start2 = time.time()
     b = Rope([a])
-    print(len(b))
-    for i in range(496):
-        b.insert(int(len(b)/2), Rope([a]))
-    print('no problem')
+    for i in range(100):
+        b.insert(int(len(b)/2), a)
     end2 = time.time()
-    print('found a bug')
-    b.insert(int(len(b)/2), Rope([a]))
-
-    print("rope append time:", end2 - start2)
+    print("rope insert time:", end2 - start2)
     
 
 if __name__ == "__main__":
