@@ -37,18 +37,18 @@ Definitions are well explained in the Wikipedia link above. The structure of the
 
 # Examples
 - The ZDD below represents the function:
-  - ![ZDDfunction1](./ZDDFunction1.png)
-  - ![ZDD1](./ZDDImage1.png)
+  - ![ZDDfunction1](./images/ZDDFunction1.png)
+  - ![ZDD1](./images/ZDDImage1.png)
   - The canonical family is `{{1}}`
 
 - The ZDD below represents the function:
-  - ![ZDDfunction2](./ZDDFunction2.png)
-  - ![ZDD2](./ZDDImage2.png)
+  - ![ZDDfunction2](./images/ZDDFunction2.png)
+  - ![ZDD2](./images/ZDDImage2.png)
   - The canonical family is `{{1}, {2}}`
 
 - The ZDD below represents the function:
-  - ![ZDDfunction3](./ZDDFunction-3.png)
-  - ![ZDD3](./ZDDImage-3.png)
+  - ![ZDDfunction3](./images/ZDDFunction-3.png)
+  - ![ZDD3](./images/ZDDImage-3.png)
   - The canonical family is `{{1}, {2}, {1, 2}}`
 
 - [N Queens Puzzle](./nQueens.ipynb)

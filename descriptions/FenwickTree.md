@@ -7,7 +7,7 @@
 # Tree Structure
 A node in a Fenwick tree has an index and a value. The root's index is 0 and the value is 0. A node's parent is found by clearing the least-significant bit in the index. Given (1-based) sequence, the value of a node is the sum of numbers since the parent's index in the tree. For example, Fenwick tree for the list `[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]` can be drawn as follows.
 
-![Fenwick Tree](./FenwickTreeImage.png)
+![Fenwick Tree](./images/FenwickTreeImage.png)
 
 - Root node has index 0<sub>2</sub> and doesn't correspond to any element of the given 1-based sequence.
 - Root node has 4 children indices: 1<sub>2</sub>, 10<sub>2</sub>, 100<sub>2</sub>, 1000<sub>2</sub> because removing the least-significant bit in the index of the children gives the root's index, 0<sub>2</sub>. However, since the last index of the given 1-based sequence is 13 and 10000<sub>2</sub> is greater, it is not a child index of the root.
