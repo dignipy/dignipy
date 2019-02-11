@@ -1,17 +1,17 @@
 import collections
-collections.defaultdict(Node)
 
 class Node():
   def __init__(self, key=None):
     self.key = key
-    self.children = { }
+    self.children = collections.defaultdict(Node)
     self.complete_string = False
 
 class Trie():
   def __init__(self, key_list):
     if len(key_list) < 1:
       return
-    self.root_node = Node(key_list[0]);
+    self.root_node = collections.defaultdict(Node)
+    self.root_node[0] = key_list[0]
     for key in key_list[1:]:
       #node = Node(key)
       self.insert(key)
@@ -31,7 +31,7 @@ class Trie():
       if node.children[char]:
         node = node.childeren[char]
       else:
-        new_node = Node(char)
+        new_node = dict(char)
         node.childeren[char] = new_node
         node = new_node
     node.complete_string = True
@@ -60,8 +60,3 @@ class Trie():
     del root_node.children[key[0]]  
     print ('root is removed')
     return True
-  
-  
-if __name__ == '__main__':
-  key_list = ['string', 'stringent', 'stringify', 'strings', 'strong', 'strung']
-  Trie(key_list)
