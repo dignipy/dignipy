@@ -10,17 +10,29 @@ class Trie():
   def __init__(self, key_list):
     if len(key_list) < 1:
       return
-    self.root_node = collections.defaultdict(Node)
-    self.root_node[0] = key_list[0]
-    for key in key_list[1:]:
+    self.root_node = Node()
+    #self.root_node[0] = key_list[0]
+    for key in key_list:
       #node = Node(key)
       self.insert(key)
       
   def find(self, key):
     node = self.root_node
     for char in key:
-      if node.children[char]:
-        node = node.childeren[char]
+      if char in node.children:
+        node = node.children[char]
+      else:
+        return False;
+    if node.complete_string:
+      return True;
+    else:
+      return False;
+
+  def find_prefix(self, key):
+    node = self.root_node
+    for char in key:
+      if char in node.children:
+        node = node.children[char]
       else:
         return False;
     return True;
@@ -28,11 +40,11 @@ class Trie():
   def insert(self, key):
     node = self.root_node
     for char in key:
-      if node.children[char]:
-        node = node.childeren[char]
+      if char in node.children:
+        node = node.children[char]
       else:
-        new_node = dict(char)
-        node.childeren[char] = new_node
+        new_node = Node(char)
+        node.children[char] = new_node
         node = new_node
     node.complete_string = True
   
@@ -60,3 +72,8 @@ class Trie():
     del root_node.children[key[0]]  
     print ('root is removed')
     return True
+
+if __name__ == '__main__':
+  key_list = ['string', 'stringfy', 'strong', 'strung']
+  trie = Trie(key_list)
+  trie.find('string')
