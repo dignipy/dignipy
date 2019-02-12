@@ -1,8 +1,8 @@
 import collections
 
 class Node():
-  def __init__(self, key=None):
-    self.key = key
+  def __init__(self):  # , key=None):
+    #self.key = key
     self.children = collections.defaultdict(Node)
     self.complete_string = False
 
@@ -36,16 +36,22 @@ class Trie():
       else:
         return False;
     return True;
-  
-  def insert(self, key):
+
+  def insert_idiotway(self, key):
     node = self.root_node
-    for char in key:
+    for char in key:    
       if char in node.children:
         node = node.children[char]
       else:
         new_node = Node(char)
         node.children[char] = new_node
         node = new_node
+    node.complete_string = True
+  
+  def insert(self, key):
+    node = self.root_node
+    for char in key:
+      node = node.children[char]
     node.complete_string = True
   
   def remove(self, key):
@@ -72,8 +78,8 @@ class Trie():
     del root_node.children[key[0]]  
     print ('root is removed')
     return True
-
+  
 if __name__ == '__main__':
   key_list = ['string', 'stringfy', 'strong', 'strung']
   trie = Trie(key_list)
-  trie.find('string')
+  trie.find('strung')
