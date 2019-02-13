@@ -81,9 +81,10 @@ if __name__ == '__main__':
   key_list = ['string', 'stringfy', 'strong', 'strung']
   trie = Trie(key_list)
   print('find strung(expect True): ', trie.find('strung'))
-  print('find strung(expect removed): ', end='')
+  print('remove strung(expect removed): ', end='')
   trie.remove('strung')
   print('find strung(expect False): ', trie.find('strung'))
-  print('find strung(expect True): ', trie.find('string'))
-  print('find strung(expect True): ', trie.find('strong'))
-  print('find strung(expect True): ', trie.find('stringfy'))
+  print('find string(expect True): ', trie.find('string'))
+  print('find stringfy(expect True): ', trie.find('stringfy'))
+  print('find strong(expect True): ', trie.find('strong'))
+  
