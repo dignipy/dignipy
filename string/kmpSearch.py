@@ -1,8 +1,6 @@
 class KMPString(str):
-    def __init__(self, string):
-        self._string = string
-        
-    def _make_match_table(self, pattern):
+    @classmethod
+    def _make_match_table(cls, pattern):
         table = [-1]
         cnd = 0
 
@@ -20,45 +18,63 @@ class KMPString(str):
 
     def kmp_search(self, pattern):
         positions = []
+        j = 0
         k = 0
         table = self._make_match_table(pattern)
-        for j in range(len(self)):
-            if pattern[k] == self[j]:
+        while j < len(pattern):
+            if self[k] == pattern[j]:
+                j += 1
                 k += 1
-                if k == len(pattern):
-                    positions.append(j+1-k)
+                if k == len(self):
+                    positions.append(j-k)
                     k = table[k]
             else:
-                k == table[k]
+                k = table[k]
                 if k < 0:
+                    j += 1
                     k += 1
         return positions
-    
-    def new_find(self, pattern):
-        positions = []
+
+    def kmp_find(self, pattern):
+        j = 0
         k = 0
         table = self._make_match_table(pattern)
-        for j in range(len(self)):
-            if pattern[k] == self[j]:
+        while j < len(pattern):
+            if self[k] == pattern[j]:
+                j += 1
                 k += 1
-                if k == len(pattern):
-                    return j+1-k
-                    k = table[k]
+                if k == len(self):
+                    return j-k
             else:
-                k == table[k]
+                k = table[k]
                 if k < 0:
+                    j += 1
                     k += 1
-        return None
+        return -1
 
 
 def example():
-    a = KMPString('hllajdsllaasdfelfkflallajllajdsllaasllajdsllaasdfdfdsllaasdf;dslkllajdsllaasdffjllajdsllaasdfokfaslo')
-    pattern = 'llajdslla'
-    print('find pattern "{}" from "{}"'.format(pattern, a))
-    indices = a.kmp_search(pattern)
-    print('found', indices)
-    for idx in indices:
-        print(a[idx:idx+len(pattern)])
+    import time
+
+    print(KMPString._make_match_table())
+    # This example is made for kmp search to out perform built-in string.find
+    #pattern = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'*10000
+    pattern = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'*10000
+    string = ''
+    for i in range(500):
+        string += pattern[:i*300]
+    string += pattern
+    a = KMPString(string)
+
+    start = time.time()
+    index = a.kmp_find(pattern)
+    print('kmp_find', index, 'took', time.time()-start)
+
+    start = time.time()
+    index = a.find(pattern)
+    print('find', index, 'took', time.time()-start)
+    
+    raise NotImplementedError('different results????')
 
 if __name__ == "__main__":
     example()
