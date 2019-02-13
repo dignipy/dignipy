@@ -1,8 +1,7 @@
 import collections
 
 class Node():
-  def __init__(self):  # , key=None):
-    #self.key = key
+  def __init__(self):
     self.children = collections.defaultdict(Node)
     self.complete_string = False
 
@@ -11,9 +10,7 @@ class Trie():
     if len(key_list) < 1:
       return
     self.root_node = Node()
-    #self.root_node[0] = key_list[0]
     for key in key_list:
-      #node = Node(key)
       self.insert(key)
       
   def find(self, key):
