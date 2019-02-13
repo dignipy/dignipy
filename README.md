@@ -11,6 +11,11 @@ Various data structure implementations in Python.
 - Fenwick Tree
   - [Description](./descriptions/FenwickTree.md), [Code](./multiwayTree/fenwickTree.py), [Wikipedia](https://en.wikipedia.org/wiki/Fenwick_tree)
 
+### Trees
+
+- TRIE (=digital tree, radix tree, or prefix tree)
+  - [Code](Trie/trie.py), [Wikipedia](https://en.wikipedia.org/wiki/Trie)
+
 ### Binary Trees
 
 - Vanilla Binary Search Tree
