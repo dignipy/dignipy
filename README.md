@@ -13,7 +13,7 @@ Various data structure implementations in Python.
 
 ### Trees
 
-- TRIE (=digital tree, radix tree, or prefix tree)
+- Trie (=digital tree, radix tree, or prefix tree)
   - [Code](Trie/trie.py), [Wikipedia](https://en.wikipedia.org/wiki/Trie)
 
 ### Binary Trees
