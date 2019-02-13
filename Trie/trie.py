@@ -56,22 +56,21 @@ class Trie():
   
   def remove(self, key):
     node = self.root_node
-    suffixes = []
+    suffixes = collections.deque()
     
     for idx, char in enumerate(key):
       if node.children[char]:
-        noded = node.children[char]
-        #suffixes.unshift(node);
-        suffixes.appendleft(node) #dequeue로 만들어야할듯?
+        node = node.children[char]
+        suffixes.appendleft(node)
         if (idx == len(key)) & len(node.children):
           print('error')
           return False
     
     for idx, char in enumerate(key):
-      parent = suffixes[idx]
-      child = key[len(suffixes) - idx]
+      parent = suffixes[idx+1]
+      child = key[len(suffixes) -1 -idx]
       del parent.children[child]
-      if parent.complete_string | len(parent.childrend):
+      if parent.complete_string | len(parent.children) == 0:
         print('removed')
         return True
     
@@ -79,7 +78,15 @@ class Trie():
     print ('root is removed')
     return True
   
+  
+  
 if __name__ == '__main__':
   key_list = ['string', 'stringfy', 'strong', 'strung']
   trie = Trie(key_list)
-  trie.find('strung')
+  print('find strung(expect True): ', trie.find('strung'))
+  print('find strung(expect removed): ', end='')
+  trie.remove('strung')
+  print('find strung(expect False): ', trie.find('strung'))
+  print('find strung(expect True): ', trie.find('string'))
+  print('find strung(expect True): ', trie.find('strong'))
+  print('find strung(expect True): ', trie.find('stringfy'))
