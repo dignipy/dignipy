@@ -16,16 +16,16 @@ class KMPString(str):
         table.append(cnd)
         return table
 
-    def kmp_search(self, pattern):
+    def kmp_find_all(self, pattern):
         positions = []
         j = 0
         k = 0
         table = self._make_match_table(pattern)
-        while j < len(pattern):
-            if self[k] == pattern[j]:
+        while j < len(self):
+            if pattern[k] == self[j]:
                 j += 1
                 k += 1
-                if k == len(self):
+                if k == len(pattern):
                     positions.append(j-k)
                     k = table[k]
             else:
@@ -39,11 +39,11 @@ class KMPString(str):
         j = 0
         k = 0
         table = self._make_match_table(pattern)
-        while j < len(pattern):
-            if self[k] == pattern[j]:
+        while j < len(self):
+            if pattern[k] == self[j]:
                 j += 1
                 k += 1
-                if k == len(self):
+                if k == len(pattern):
                     return j-k
             else:
                 k = table[k]
@@ -56,25 +56,20 @@ class KMPString(str):
 def example():
     import time
 
-    print(KMPString._make_match_table())
-    # This example is made for kmp search to out perform built-in string.find
-    #pattern = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'*10000
-    pattern = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'*10000
+    pattern = 'lallalllallllalllllallllllalllllllallllllllallllllllllallllllllllallllllllllla'
     string = ''
-    for i in range(500):
-        string += pattern[:i*300]
+    for i in range(10):
+        string += pattern[:-2]
     string += pattern
     a = KMPString(string)
 
     start = time.time()
+    index = a.find(pattern)
+    print('find', index, 'took', time.time()-start)
+    start = time.time()
     index = a.kmp_find(pattern)
     print('kmp_find', index, 'took', time.time()-start)
 
-    start = time.time()
-    index = a.find(pattern)
-    print('find', index, 'took', time.time()-start)
-    
-    raise NotImplementedError('different results????')
 
 if __name__ == "__main__":
     example()
