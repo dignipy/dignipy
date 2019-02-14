@@ -15,6 +15,7 @@ Various data structure implementations in Python.
 
 - Trie (=digital tree, radix tree, or prefix tree)
   - [Code](Trie/trie.py), [Wikipedia](https://en.wikipedia.org/wiki/Trie)
+  - [Burst Tries](http://www.lindstaedt.com.br/estruturas/bursttries.pdf)
 
 ### Binary Trees
 
