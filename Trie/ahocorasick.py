@@ -8,9 +8,10 @@ Aho-corasick Trie
     - Brute-force method takes O(n * (m1 + m2 + m3 + ... + mk))
     - But, Aho-corasick takes O(n + m1 + m2 + ... mk)
 
-Each nodes 
-- have go-links and one failure-link(also called failure funciton)
-- if it is the end of the pattern, is_ouput: True
+Each nodes have
+- go-links (it contains children)
+- a failure-link(also called failure function)
+- an output-link(also called output function)
 
 Related Problem:
 - https://www.acmicpc.net/problem/9250
@@ -110,13 +111,9 @@ if __name__ == '__main__':
         AhoCorasickTrie.insert_word_from(root, pattern)
     
     AhoCorasickTrie.show_all_by_dfs(root, msg='Before Setting Failure Links')
+    
     AhoCorasickTrie.set_failure_links(root) # [TODO] 통합시키기
     AhoCorasickTrie.show_all_by_dfs(root, msg='After Setting Failure Links')
     
     print(AhoCorasickTrie.search(root, 'adacab'))
     #print(AhoCorasickTrie.search(root, 'she'))
-
-
-    
-
-    
