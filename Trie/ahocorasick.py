@@ -4,7 +4,7 @@ This module implements Aho-corasick Trie
 
 Aho-corasick Trie
 - can find patterns {A, B, C...} in Text efficiently
-    - if n: length of text, m: length of each pattern
+    - if n: length of text, m: length of each patterns
     - Brute-force method takes O(n * (m1 + m2 + m3 + ... + mk))
     - But, Aho-corasick takes O(n + m1 + m2 + ... mk)
 
@@ -12,6 +12,8 @@ Each nodes
 - have go-links and one failure-link(also called failure funciton)
 - if it is the end of the pattern, is_ouput: True
 
+Related Problem:
+- https://www.acmicpc.net/problem/9250
 '''
 import collections
 
@@ -23,12 +25,14 @@ class AhoCorasickTrie():
         self.key = key
         self.go = {}
         self.fail = None
-        self.is_output = False
+        self.output = None
+        self.pattern = None
     
     def __repr__(self):
         fail_id = self.fail.id if self.fail else '@'
-        return '{}@Node({}, {}, {})'.format(self.id, self.key, fail_id, self.is_output)
-    
+        output_id = self.output.id if self.output else '@'
+        return '[#{}]Node({}, {}, {}-{})'.format(self.id, self.key, fail_id, output_id, self.pattern)
+
     @classmethod
     def insert_word_from(cls, root, word):
         cur_node = root
@@ -39,7 +43,8 @@ class AhoCorasickTrie():
                 cur_node = new_node
             else:
                 cur_node = cur_node.go[key]
-        cur_node.is_output = True
+        cur_node.output = cur_node
+        cur_node.pattern = word
     
     @classmethod
     def set_failure_links(cls, root):
@@ -47,7 +52,7 @@ class AhoCorasickTrie():
         root.fail = root;
         Q.append(root)
         while Q:
-            # check 'current', 'next' node then set the failure, output link
+            # check 'current', 'next' node then set the failure, output link of child nodes
             current = Q.popleft()
             for _, child_node in current.go.items():
                 next = child_node
@@ -62,30 +67,56 @@ class AhoCorasickTrie():
                         dest = dest.go[next.key]
                     next.fail = dest
                 # fail(x) = y, output(y) ⊂ output(x)
-                if next.fail.is_output:
-                    next.is_output = True
+                if next.fail.output:
+                    next.output = next.fail.output
                 Q.append(next)
         # End of while Q
-
+    
     @classmethod
-    def show_all_by_dfs(cls, node, level=0):
+    def search(cls, root, text):
+        patterns = set()
+        current = root
+        for next_char in text:
+            while current != root and not (next_char in current.go):
+                current = current.fail
+            if next_char in current.go:
+                current = current.go[next_char]
+            if current.output:
+                tmp = current
+                while tmp and tmp.output:
+                    if tmp.pattern: patterns.add(tmp.pattern)
+                    if tmp == tmp.output: break
+                    tmp = tmp.output
+        return patterns
+    
+    @classmethod
+    def show_all_by_dfs(cls, node, level=0, msg=''):
+        if level == 0:
+            print(msg)
+            print('--------------------------------------')
         print((' ' * 2 * level) + str(node))
         for _, child_node in node.go.items():
             cls.show_all_by_dfs(child_node, level + 1)
     
+    
 if __name__ == '__main__':
-    patterns = ['a', 'ab', 'ac', 'adab', 'adada']
+    patterns = ['a', 'ab', 'ac', 'adab', 'adada', 'adac']
+    #patterns = ['a', 'ab', 'c', 'acd']
+    #patterns = ['abcd', 'ad']
+    #patterns = ['bcab', 'bcada', 'a']
+    #patterns = ['his', 'he', 'she', 'hers']
     root = AhoCorasickTrie()
     for pattern in patterns:
         AhoCorasickTrie.insert_word_from(root, pattern)
     
-    print('Before Setting Failure Llink')
-    print('--------------------------------------')
-    AhoCorasickTrie.show_all_by_dfs(root)
+    AhoCorasickTrie.show_all_by_dfs(root, msg='Before Setting Failure Links')
+    AhoCorasickTrie.set_failure_links(root) # [TODO] 통합시키기
+    AhoCorasickTrie.show_all_by_dfs(root, msg='After Setting Failure Links')
     
-    print('--------------------------------------')
-    AhoCorasickTrie.set_failure_links(root)
-    AhoCorasickTrie.show_all_by_dfs(root)
+    print(AhoCorasickTrie.search(root, 'adacab'))
+    #print(AhoCorasickTrie.search(root, 'she'))
+
+
     
 
     
