@@ -35,4 +35,4 @@
 
 ## 참고자료
 - [알고리즘 설명 슬라이드](https://www.slideshare.net/ssuser81b91b/ahocorasick-algorithm): 가장 상세한 자료입니다. output 링크 초기화 하는 부분이 애매해서, 다른 방식으로 구현했고 잘 동작하는 것 같습니다.
-- [알고리즘 설명 블로그](https://m.blog.naver.com/PostView.nhn?blogId=kks227&logNo=220992598966&proxyReferer=https%3A%2F%2Fwww.google.com%2F): 구현 부분을 부분 참조하였습니다. search 해당하는 부분은 특정 문제에 한정시킨 버전으로 구현이 되어 새로 구현하였습니다.
+- [알고리즘 설명 블로그](https://m.blog.naver.com/PostView.nhn?blogId=kks227&logNo=220992598966&proxyReferer=https%3A%2F%2Fwww.google.com%2F): 구현 부분을 참조하였습니다. search 해당하는 부분은 특정 문제에 한정시킨 버전으로 구현이 되어 새로 구현하였습니다.
