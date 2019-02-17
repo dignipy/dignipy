@@ -17,7 +17,7 @@ Various data structure implementations in Python.
   - [Code](Trie/trie.py), [Wikipedia](https://en.wikipedia.org/wiki/Trie)
   - [Burst Tries](http://www.lindstaedt.com.br/estruturas/bursttries.pdf)
 - Aho-Corasick
-  - [Code](Trie/ahocorasick.py), [Wikipedia](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm)
+  - [Description(kor)](./descriptions/AhoCorasick.kor.md), [Code](Trie/ahocorasick.py), [Wikipedia](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm)
   
 ### Binary Trees
 
