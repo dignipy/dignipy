@@ -30,7 +30,7 @@
 		2. current의 go에 next_char가 포함될 때까지, fail을 타고 current를 이동시킵니다.
 		3. current의 go가 next_char를 포함할 경우 current를 해당 go[next_char] 노드로 설정합니다.
 		4. current 노드의 output 링크를 확인해서 완성된 패턴을 수집합니다. (타고 타고 갈 수도)
-		5. 2-3 과정을 text의 다음 char를 가져오면서 반복합니다.
+		5. b-d 과정을 text의 다음 char를 가져오면서 반복합니다.
 
 
 ## 참고자료
