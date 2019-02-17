@@ -101,7 +101,7 @@ class AhoCorasickTrie():
     
     
 if __name__ == '__main__':
-    patterns = ['a', 'ab', 'ac', 'adab', 'adada', 'adac']
+    patterns = ['a', 'ab', 'ac', 'adab', 'adada', 'adac', 'd']
     #patterns = ['a', 'ab', 'c', 'acd']
     #patterns = ['abcd', 'ad']
     #patterns = ['bcab', 'bcada', 'a']
@@ -116,4 +116,5 @@ if __name__ == '__main__':
     AhoCorasickTrie.show_all_by_dfs(root, msg='After Setting Failure Links')
     
     print(AhoCorasickTrie.search(root, 'adacab'))
+    print(AhoCorasickTrie.search(root, 'acadab'))
     #print(AhoCorasickTrie.search(root, 'she'))
