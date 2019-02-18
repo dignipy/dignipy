@@ -21,7 +21,9 @@
 	- current, next 두 개의 포인터 이용, (KMP 알고리즘과 같은 원리, prefix==suffix...)
 		1. current가 root일 경우 next의 fail은 root입니다.
 		2. 그 외의 경우엔 current를 임시 변수(dest)에 담아 두고 
-			- (dest = dest.fail)을 dest의 go가 next의 key를 포함할 때 까지 반복 이동시킵니다. (until dest != root)
+			- (dest = dest.fail)을 이용해서 dest의 go가 next의 key를 포함할 때 까지 dest를 반복 이동시킵니다. 
+				- 최초 1회는 무조건 실행
+				- dest != root일 때 까지 반복
 			- go에 next의 key를 포함하는 dest를 발견할 경우 next의 fail을 dest로 설정합니다.
 
 3. 패턴 찾기
