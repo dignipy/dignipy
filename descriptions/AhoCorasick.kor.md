@@ -21,6 +21,7 @@
 	- current, next 두 개의 포인터 이용. 
 		- 패턴 하나 기준으로는 KMP 알고리즘과 비슷한 원리인듯 합니다. prefix==suffix 지점을 추적합니다.
 			- 즉 현재 fail이 발생한 노드 까지의 subpattern을 생각 했을 때 prefix와 suffix가 같아지는 지점의 prefix 끝으로 failure link를 향하게 합니다. (ex. 'abcab', b_2에서 fail 발생할 경우 b_1로 링크)
+			- 하지만, 꼭 하나의 패턴 안에서만 생각하는 것은 아닙니다. 예를들어, 'she', 'he' 패턴이 있는 경우 'she'의 h의 failure링크는 아래 로직에 따라 'he'의 h로 이어질 수 있습니다. (패턴간의 연결장치 역할 - 패턴간의 부분집합 관계를 표현)
 		1. current가 root일 경우 next의 fail은 root입니다.
 		2. 그 외의 경우엔 current를 임시 변수(dest)에 담아 두고 
 			- (dest = dest.fail)을 이용해서 dest의 go가 next의 key를 포함할 때 까지 dest를 반복 이동시킵니다. 
