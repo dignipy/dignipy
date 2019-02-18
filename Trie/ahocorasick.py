@@ -9,7 +9,7 @@ Aho-corasick Trie
     - But, Aho-corasick takes O(n + m1 + m2 + ... mk)
 
 Each nodes have
-- go-links (it contains children)
+- go-links (it contains children, also called go function)
 - a failure-link(also called failure function)
 - an output-link(also called output function)
 
@@ -19,10 +19,12 @@ Related Problem:
 import collections
 
 class AhoCorasickTrie():
-    cnt = 0
+    _cnt = 0
+    _root = None
+    
     def __init__(self, key=None):
-        AhoCorasickTrie.cnt += 1
-        self.id = AhoCorasickTrie.cnt # for debugging
+        AhoCorasickTrie._cnt += 1
+        self._id = AhoCorasickTrie._cnt # for debugging
         self.key = key
         self.go = {}
         self.fail = None
@@ -30,13 +32,13 @@ class AhoCorasickTrie():
         self.pattern = None
     
     def __repr__(self):
-        fail_id = self.fail.id if self.fail else '@'
-        output_id = self.output.id if self.output else '@'
-        return '[#{}]Node({}, {}, {}-{})'.format(self.id, self.key, fail_id, output_id, self.pattern)
+        fail_id = self.fail._id if self.fail else '@'
+        output_id = self.output._id if self.output else '@'
+        return '[#{}]Node({}, {}, {}-{})'.format(self._id, self.key, fail_id, output_id, self.pattern)
 
     @classmethod
-    def insert_word_from(cls, root, word):
-        cur_node = root
+    def _insert_word_from(cls, word):
+        cur_node = cls._root
         for key in word:
             if key not in cur_node.go:
                 new_node = AhoCorasickTrie(key)
@@ -48,21 +50,21 @@ class AhoCorasickTrie():
         cur_node.pattern = word
     
     @classmethod
-    def set_failure_links(cls, root):
+    def _set_failure_links(cls):
         Q = collections.deque() # for BFS
-        root.fail = root;
-        Q.append(root)
+        cls._root.fail = cls._root;
+        Q.append(cls._root)
         while Q:
             # check 'current', 'next' node then set the failure, output link of child nodes
             current = Q.popleft()
             for _, child_node in current.go.items():
                 next = child_node
-                if current == root:
-                    next.fail = root
+                if current == cls._root:
+                    next.fail = cls._root
                 else:
                     dest = current.fail
                     # go upward to find node which has next.key in its go link
-                    while dest != root and not (next.key in dest.go):
+                    while dest != cls._root and not (next.key in dest.go):
                         dest = dest.fail
                     if next.key in dest.go:
                         dest = dest.go[next.key]
@@ -72,13 +74,32 @@ class AhoCorasickTrie():
                     next.output = next.fail.output
                 Q.append(next)
         # End of while Q
-    
+        
     @classmethod
-    def search(cls, root, text):
+    def _show_all_by_dfs(cls, node, level=0, msg=''):
+        if level == 0:
+            print('--------------------------------------')
+            print(msg)
+            print('--------------------------------------')
+        print((' ' * 2 * level) + str(node))
+        for _, child_node in node.go.items():
+            cls._show_all_by_dfs(child_node, level + 1)
+            
+    @classmethod
+    def build_from(cls, patterns, debug=False):
+        cls._root = AhoCorasickTrie()
+        for pattern in patterns:
+            cls._insert_word_from(pattern)
+        if debug: cls._show_all_by_dfs(cls._root, msg='Before Setting Failure Links')
+        cls._set_failure_links()
+        if debug: cls._show_all_by_dfs(cls._root, msg='After Setting Failure Links')
+        
+    @classmethod
+    def search_patterns_in(cls, text):
         patterns = set()
-        current = root
+        current = cls._root
         for next_char in text:
-            while current != root and not (next_char in current.go):
+            while current != cls._root and not (next_char in current.go):
                 current = current.fail
             if next_char in current.go:
                 current = current.go[next_char]
@@ -90,31 +111,17 @@ class AhoCorasickTrie():
                     tmp = tmp.output
         return patterns
     
-    @classmethod
-    def show_all_by_dfs(cls, node, level=0, msg=''):
-        if level == 0:
-            print(msg)
-            print('--------------------------------------')
-        print((' ' * 2 * level) + str(node))
-        for _, child_node in node.go.items():
-            cls.show_all_by_dfs(child_node, level + 1)
-    
     
 if __name__ == '__main__':
-    patterns = ['a', 'ab', 'ac', 'adab', 'adada', 'adac', 'd']
+    #patterns = ['a', 'ab', 'ac', 'adab', 'adada', 'adac', 'd']
     #patterns = ['a', 'ab', 'c', 'acd']
     #patterns = ['abcd', 'ad']
     #patterns = ['bcab', 'bcada', 'a']
-    #patterns = ['his', 'he', 'she', 'hers']
-    root = AhoCorasickTrie()
-    for pattern in patterns:
-        AhoCorasickTrie.insert_word_from(root, pattern)
+    patterns = ['his', 'he', 'she', 'hers']
     
-    AhoCorasickTrie.show_all_by_dfs(root, msg='Before Setting Failure Links')
+    AhoCorasickTrie.build_from(patterns, debug=True)
     
-    AhoCorasickTrie.set_failure_links(root) # [TODO] 통합시키기
-    AhoCorasickTrie.show_all_by_dfs(root, msg='After Setting Failure Links')
-    
-    print(AhoCorasickTrie.search(root, 'adacab'))
-    print(AhoCorasickTrie.search(root, 'acadab'))
-    #print(AhoCorasickTrie.search(root, 'she'))
+    #print(AhoCorasickTrie.search_patterns_in('adacab'))
+    #print(AhoCorasickTrie.search_patterns_in('acadab'))
+    print(AhoCorasickTrie.search_patterns_in('she'))
+    print(AhoCorasickTrie.search_patterns_in('hershe'))
