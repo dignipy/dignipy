@@ -4,12 +4,12 @@
 
 ## 사용법
 ```py
-    patterns = ['his', 'he', 'she', 'hers']
+patterns = ['his', 'he', 'she', 'hers']
     
-    AhoCorasickTrie.build_from(patterns, debug=True)
+AhoCorasickTrie.build_from(patterns, debug=True)
     
-    print(AhoCorasickTrie.search_patterns_in('she')) # {'he', 'she'}
-    print(AhoCorasickTrie.search_patterns_in('hershe')) # {'he', 'she', 'hers'}
+print(AhoCorasickTrie.search_patterns_in('she')) # {'he', 'she'}
+print(AhoCorasickTrie.search_patterns_in('hershe')) # {'he', 'she', 'hers'}
 ```
 
 ## 구현 설명 ([코드 바로가기](../Trie/ahocorasick.py))
