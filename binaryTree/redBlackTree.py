@@ -235,10 +235,14 @@ class RedBlackTree():
                 node = self.move_red_right(node)
             
             if key == node.key:
-                min_node = self.minimum_node(node)
-                node.key = min_node.key
-                node.value = min_node.value
-                node.right = self._delete_min(node.right)
+                # remove root
+                if node.right is not None:
+                    min_node = self.minimum_node(node.right)
+                    node.key = min_node.key
+                    node.value = min_node.value
+                    node.right = self._delete_min(node.right)
+                else:
+                    node = node.left
             else:
                 node.right = self._delete(node.right, key)
             return self.fix_up(node)
