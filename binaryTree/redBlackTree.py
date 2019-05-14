@@ -216,6 +216,9 @@ class RedBlackTree():
         if self.is_red(node.left) and self.is_red(node.right):
             self.flip_colors(node)
         return node
+    
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
 
     def _delete(self, node, key):
         if key < node.key:
@@ -224,25 +227,23 @@ class RedBlackTree():
             if not (self.is_red(node.left)) and (not self.is_red(node.left.left)):
                 node = self.move_red_left(node)
             node.left = self._delete(node.left, key)
+            return node
         else:
             if self.is_red(node.left):
                 node = self.rotate_right(node)
             if key == node.key and node.right is None:
-                return None
+                return node.left
             elif node.right is None:
                 raise KeyError(key)
             elif (not self.is_red(node.right)) and (not self.is_red(node.right.left)):
                 node = self.move_red_right(node)
             
-            if key == node.key:
+            if key == node.key: # and node.right is not None:
                 # remove root
-                if node.right is not None:
-                    min_node = self.minimum_node(node.right)
-                    node.key = min_node.key
-                    node.value = min_node.value
-                    node.right = self._delete_min(node.right)
-                else:
-                    node = node.left
+                min_node = self.minimum_node(node.right)
+                node.key = min_node.key
+                node.value = min_node.value
+                node.right = self._delete_min(node.right)
             else:
                 node.right = self._delete(node.right, key)
             return self.fix_up(node)
