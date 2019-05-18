@@ -34,6 +34,20 @@ class Trie():
                 return False;
         return True;
 
+    def find_common_prefix(self):
+        node = self.root_node
+        _cp = ''
+        while(len(node.children) > 0):
+            if (len(node.children) > 1):
+                break
+            if node.complete_string:
+                break
+            else:
+                _value = node.children.keys()[0]
+                _cp += _value
+                node = node.children[_value]
+        return _cp
+    
     def insert_idiotway(self, key):
         node = self.root_node
         for char in key:    
