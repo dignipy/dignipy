@@ -9,112 +9,133 @@ Space complexity: O(k)
 class SmallestSubstring():
     def __init__(self, s):
         self.string = s
-        
-    
-    def calculate_prefix_len(self, max_prefix_len, new_idx, pattern_len, k, len_string):
-        # To Do: 이해하기 어려움;;
-        if pattern_len is None:
-            return max_prefix_len
-        prefix_len = max_prefix_len
-        maxi = max(pattern_len, new_idx + pattern_len + k - len_string)
-        if maxi < max_prefix_len:
-            diff = max_prefix_len - maxi
-            cnt = -(-diff//pattern_len) # same as math.ceil
-            prefix_len = max_prefix_len - cnt * pattern_len
-        return prefix_len
-
 
     def smallest_substring(self, k):
         string = self.string
-        # state variables
         current_idx = 0
-        (prefix_len, max_prefix_len, pattern_len) = (0, 0, None) # initial setting
-        states_stack = [(0,0,None)] # states_stack contains states of a current minimum string's prefix
+        # new_idx = 0
+        prefix_len = 0
+        # current_idx: the starting index of current smallest string.
+        # new_idx: the index of the character that we want to compare to a character in current smallest string.
+        # prefix_len: the length of current smallest string's prefix that is the same as a substring ending at new_idx.
+        # in other words, string[current_idx: current_idx + prefix_len] == string[new_idx-prefix_len: new_idx]
 
+        stack = [prefix_len] # stack contains the current smallest substring's prefix_lens
+        # stack stores prefix_len data in case another substring with a same prefix becomes a new smallest substring.
+        # in such a case, we reuse stack[:prefix_len] of the stack and pop the rest
         for new_idx in range(1, len(string)):
-            new_num = ord(string[new_idx])
-
-            # check if new smallest substring will start at new_idx
-            current_start_num = ord(string[current_idx])
-            if current_start_num > new_num and new_idx + k - 1 < len(string):
+            new_char = string[new_idx]
+            current_start_char = string[current_idx]
+            if current_start_char > new_char and new_idx + k - 1 < len(string):
                 current_idx = new_idx
-                (prefix_len, max_prefix_len, pattern_len) = (0, 0, None)
-                states_stack = [(0,0,None)]
+                prefix_len = 0
+                stack = [prefix_len]
                 continue
-                # this is the new starting point
-
-            # state update when current_idx changes !
-            while ord(string[current_idx + prefix_len]) > new_num:
+            while string[current_idx + prefix_len] > new_char:
                 if new_idx - prefix_len + k - 1 >= len(string):
-                    # no possible new starts anymore
                     return string[current_idx:current_idx+k]
-                #assert prefix_len != 0, "if prefix_len is 0, it should have been handled by the 'continue' above nonzero !"
+                # note that if prefix_len == 0, current_idx = new_idx so while loop exits after one loop:
                 current_idx = new_idx - prefix_len
+                if stack and len(stack) > prefix_len:
+                    del stack[prefix_len:] # multiple pop()s
+                    # the while loop is here only to pop() the stack. total time complexity = O(n)
                 if prefix_len > 1:
-                    (_, max_prefix_len, pattern_len) = states_stack[prefix_len-1] # get state from the same position before
-                    prefix_len = self.calculate_prefix_len(max_prefix_len, new_idx-1, pattern_len, k, len(string))
+                    prefix_len = stack[prefix_len-1] # get state from the same position before
+                    # note that stack[i] <= i holds, so prefix_len always decreases
+                    # this while loop only decreses len(stack)
+                    # number of items to be deleted is at most the number of items appended
+                    # total number of items that are appended is at most n
+                    # thus total time consumed by the while loop is at most O(n) throughout the entire code.
                 elif prefix_len == 1:
-                    (prefix_len, max_prefix_len, pattern_len) = (0, 0, None)
-
-                while states_stack and len(states_stack) > new_idx - current_idx:
-                    states_stack.pop()
-                    # the 2 while loops are here only to pop() the stack. total time complexity = O(n)
+                    prefix_len = 0
 
             if new_idx - prefix_len + k - 1 >= len(string):
-                # no possible new starts anymore
                 return string[current_idx:current_idx+k]
-
-            #assert ord(string[current_idx + prefix_len]) <= new_num, 'the other case should have been handled above'
-            if ord(string[current_idx + prefix_len]) < new_num: #current_num = ord(string[current_idx + prefix_len])
-                (prefix_len, max_prefix_len, pattern_len)  = (0, 0, None)
-            else:
+            if string[current_idx + prefix_len] < new_char:
+                prefix_len = 0
+            else: # string[current_idx + prefix_len] == new_char:
                 prefix_len += 1
-                max_prefix_len += 1
-                # prefix_len == the length of the common prefix between current minimum string and new candidate string
-
-                if pattern_len is None and current_idx + 2*prefix_len == new_idx + 1:
-                    pattern_len = prefix_len # pattern found
-
-                prefix_len = self.calculate_prefix_len(max_prefix_len, new_idx, pattern_len, k, len(string))
-
                 if prefix_len == k:
-                    # reset state from the same substring as previous minimum substring
-                    (_, max_prefix_len, pattern_len) = states_stack[k-1]
-                    prefix_len = self.calculate_prefix_len(max_prefix_len, new_idx, pattern_len, k, len(string))
-
-            if len(states_stack) < k: # the only append is here. Thus, space complexity = O(k)
-                states_stack.append((prefix_len, max_prefix_len, pattern_len))
-
+                    prefix_len = stack[k-1]
+            if len(stack) < k: # the only append is here. Thus, space complexity = O(k)
+                stack.append(prefix_len)
         ans = string[current_idx:current_idx+k]
         return ans
 
+    
+##################################################
+############### SOME EXPLANATIONS ################
+##################################################
+# string:      a x y z z z a x y b ...
+# stack:       0 0 0 0 0 0 1 2 3 
+# current_idx  ^
+# at this point we know that new current_idx will be 6, since 'z' > 'b'
+# before getting the new prefix length for b, we want to update the stack by deleting stack[3:]
+
+# string:      a x y b ...
+# stack:       0 0 0 0
+# current_idx  ^
+
+# In this way, we can reuse stack elements corresponding to 'axy'
+
+##################################################
+# at every step, we check if the new character is smaller than the current starting character:
+# string:      b c d e a ...
+# stack:       0 0 0 0
+# current_idx  ^
+
+# since 'b' > 'a', 
+# string:      b c d e a ...
+# stack:               0
+# current_idx          ^
+
+##################################################
+# the reason we have while loop:
+# current_idx can change multiple times before new prefix_len is appended
+
+# string:      a b c a b c a b a
+# stack:       0 0 0 1 2 3 4 5
+# current_idx  ^
+
+# we reuse the stack corresponding to "abcab"
+# since 'c' > 'a', 
+# string:      a b c a b c a b a
+# stack:             0 0 0 1 2
+# current_idx        ^
+
+# we reuse the stack corresponding to "ab"
+# since 'c' > 'a',
+# string:      a b c a b c a b a
+# stack:                   0 0 1
+# current_idx              ^
+
+##################################################
+# k = 3
+# string:      a b c d e f g a b c ...
+# stack:       0 0 0
+# prefix_len   0 0 0 0 0 0 0 1 2
+# current_idx  ^
+
+# since k == 3, prefix_len for index 9 will be 0
+# we can assume that we hadn't seen "defgabc" and start over
+
+# note that we reuse prefix_len many elements from the beginning of the statck, 
+# the stack doesn't need to be longer than k
+##################################################
+
 
 def example():
-    def left_small(string1, string2):
-        for c1, c2 in zip(string1, string2):
-            if ord(c1) < ord(c2):
-                return True
-            elif ord(c1) > ord(c2):
-                return False
-            else:
-                continue
-        # same
-        return False
-
     def brute(string, k):
         min_string = string[:k]
         for idx in range(0, len(string)-k+1):
-            if left_small(string[idx: idx+k], min_string):
+            if string[idx: idx+k] < min_string:
                 min_string = string[idx: idx+k]
         return min_string
-    
-
 
     import random
     random.seed(87)
     n = 1000
     for test_case in range(100000):
-
         tmp_strs = []
         for _ in range(n):
             if random.random() > 0.5:
@@ -128,7 +149,6 @@ def example():
 
         if not test_case%10000:
             print(test_case)
-
     print('all okay')
 
     
