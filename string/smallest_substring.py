@@ -1,5 +1,6 @@
 """
-Given a string s that consists of lowercase alphabets and a positive integer k return the lexicographically smallest substring of s that has length k.
+Given a string s that consists of lowercase alphabets and a positive integer k,
+return the lexicographically smallest substring of s that has length k.
 
 Time complexity: O(n)
 Space complexity: O(k)
@@ -39,15 +40,13 @@ class SmallestSubstring():
                 if stack and len(stack) > prefix_len:
                     del stack[prefix_len:] # multiple pop()s
                     # the while loop is here only to pop() the stack. total time complexity = O(n)
-                if prefix_len > 1:
+                if prefix_len >= 1:
                     prefix_len = stack[prefix_len-1] # get state from the same position before
                     # note that stack[i] <= i holds, so prefix_len always decreases
                     # this while loop only decreses len(stack)
                     # number of items to be deleted is at most the number of items appended
                     # total number of items that are appended is at most n
                     # thus total time consumed by the while loop is at most O(n) throughout the entire code.
-                elif prefix_len == 1:
-                    prefix_len = 0
 
             if new_idx - prefix_len + k - 1 >= len(string):
                 return string[current_idx:current_idx+k]
@@ -62,14 +61,14 @@ class SmallestSubstring():
         ans = string[current_idx:current_idx+k]
         return ans
 
-    
+
 ##################################################
 ############### SOME EXPLANATIONS ################
 ##################################################
-# string:      a x y z z z a x y b ...
-# stack:       0 0 0 0 0 0 1 2 3 
+# string:      a x y w z z a x y b ...
+# stack:       0 0 0 0 0 0 1 2 3
 # current_idx  ^
-# at this point we know that new current_idx will be 6, since 'z' > 'b'
+# at this point we know that current_idx will change to 6 since 'w' > 'b'.
 # before getting the new prefix length for b, we want to update the stack by deleting stack[3:]
 
 # string:      a x y b ...
