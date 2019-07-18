@@ -1,26 +1,3 @@
-# -*- coding: utf-8 -*-
-"""fenwickTree.py
-
-This module implements Fenwick tree as described in:
-    https://en.wikipedia.org/wiki/Fenwick_tree
-
-A Fenwick tree or binary indexed tree is a data structure that can
-efficiently update elements and calculate prefix sums in a table of
-numbers. This structure was proposed by Peter Fenwick in 1994 to improve
-the efficiency of arithmetic coding compression algorithms.
-
-When compared with a flat array of numbers, the Fenwick tree achieves a
-much better balance between two operations: element update and prefix
-sum calculation.
-
-Both prefix sum queries and modifications to the table are executed in
-asymptotically equivalent time O(log n) in the worst case.
-
-However, inserting or deleting in the middle of the list still takes O(n)
-time.
-
-"""
-
 import collections
 
 
@@ -109,8 +86,49 @@ class FenwickTree(collections.abc.MutableSequence):
             diff //= 2
             children.append(tree_idx + diff)
         return children
+    
+    def _children_indices_with_minimum(self, tree_idx, mini):
+        """get the list of children indices"""
+        children = []
+        max_idx = len(self.elements)
+        if tree_idx == 0:
+            idx = 1
+            while idx <= max_idx:
+                if mini <= idx:
+                    children.append(idx)
+                idx *= 2
+            return children
 
+        diff = tree_idx & -tree_idx
+        if diff == 0:
+            return []
+        while diff != 1:
+            diff //= 2
+            if tree_idx + diff > max_idx:
+                continue
+            elif tree_idx + diff < mini:
+                break
+            else:
+                children.append(tree_idx + diff)
+            
+        return children
+    
     def _affected_indices(self, tree_idx):
+        
+        p_list = []
+        p_idx = self._parent_index(tree_idx)
+        while p_idx > 0:
+            p_list.append(p_idx)
+            p_idx = self._parent_index(p_idx)
+        p_list.append(0)
+            
+        affected = []
+        for p_idx in p_list:
+            candidates = self._children_indices_with_minimum(p_idx, tree_idx)
+            affected.extend(candidates)
+        return affected
+
+    def bk_affected_indices(self, tree_idx):
         """get list of indices affected when changing elements[tree_idx-1]"""
         output = [tree_idx]
         max_tree_idx = len(self._fenwick_tree) - 1
@@ -172,23 +190,3 @@ class FenwickTree(collections.abc.MutableSequence):
             summation += self.elements[idx]
             sums.append(summation)
         return sums
-
-
-if __name__ == '__main__':
-    """example"""
-
-    f_tree = FenwickTree(list(range(8)))
-    print('print:', f_tree)
-    # print: FenwickTree([0, 1, 2, 3, 4, 5, 6, 7])
-
-    print('prefix sums:', [f_tree.prefix_sum(i) for i in range(len(f_tree))])
-    # prefix sums: [0, 1, 3, 6, 10, 15, 21, 28]
-
-    f_tree[3] = 100
-    f_tree.append(9999)
-    print('prefix sums:', [f_tree.prefix_sum(i) for i in range(len(f_tree))])
-    # prefix sums: [0, 1, 3, 103, 107, 112, 118, 125, 10124]
-
-    f_tree.__delitem__(2)
-    print('prefix sums:', [f_tree.prefix_sum(i) for i in range(len(f_tree))])
-    # prefix sums: [0, 1, 101, 105, 110, 116, 123, 10122]
